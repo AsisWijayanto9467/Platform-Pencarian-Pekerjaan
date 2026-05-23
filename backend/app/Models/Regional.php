@@ -16,4 +16,8 @@ class Regional extends Model
     public function societies() {
         return $this->hasMany(Society::class);
     }
+
+    public function validators() {
+        return $this->hasMany(Validator::class);
+    }
 }

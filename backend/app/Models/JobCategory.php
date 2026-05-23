@@ -9,7 +9,9 @@ class JobCategory extends Model
     protected $table = "job_categories";
 
     protected $fillable = [
-        "job_category"
+        "job_category",
+        "description",
+        "is_active"
     ];
 
     public function Validations() {

@@ -18,17 +18,14 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'username',
-        'password',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
+        "email",
+        "password",
+        "role",
+        "unreadable_type",
+        "userable_id",
+        "login_tokens",
+        "last_login_at",
+        "is_active"
     ];
 
     /**
@@ -45,5 +42,9 @@ class User extends Authenticatable
 
     public function validators() {
         return $this->hasMany(Validator::class);
+    }
+
+    public function notifications() {
+        return $this->hasMany(Notification::class);
     }
 }
