@@ -44,6 +44,29 @@ class User extends Authenticatable
         return $this->hasMany(Validator::class);
     }
 
+    public function userable()
+    {
+        return $this->morphTo();
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class, 'userable_id')
+                    ->where('userable_type', 'App\Models\Admin');
+    }
+
+    public function society()
+    {
+        return $this->belongsTo(Society::class, 'userable_id')
+                    ->where('userable_type', 'App\Models\Society');
+    }
+
+    public function validator()
+    {
+        return $this->belongsTo(Validator::class, 'userable_id')
+                    ->where('userable_type', 'App\Models\Validator');
+    }
+
     public function notifications() {
         return $this->hasMany(Notification::class);
     }
