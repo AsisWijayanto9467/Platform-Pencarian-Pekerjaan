@@ -32,6 +32,10 @@ class Society extends Model
         return $this->belongsTo(Regional::class);
     }
 
+    public function user() {
+        return $this->morphOne(User::class, 'userable');
+    }
+
     public function Validations() {
         return $this->hasMany(Validation::class);
     }

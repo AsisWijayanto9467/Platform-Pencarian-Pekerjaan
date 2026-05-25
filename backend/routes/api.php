@@ -4,29 +4,29 @@ use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\ApplyJobController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\JobVacancyController;
-use App\Http\Controllers\API\Society\SocietyController;
+use App\Http\Controllers\API\SocietyController;
 use App\Http\Controllers\API\ValidationController;
-use App\Http\Controllers\API\Validator\ValidatorController;
+use App\Http\Controllers\API\ValidatorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::prefix("v1")->group(function() {
-    Route::prefix("auth")->group(function() {
+Route::prefix("v1")->group(function () {
+    Route::prefix("auth")->group(function () {
         Route::post("/login", [AuthController::class, "login"]);
         Route::post("/register", [AuthController::class, "registerSociety"]);
+        Route::get("/get-regional", [AuthController::class, "getRegionals"]);
         Route::post("/forgot-password", [AuthController::class, "forgotPassword"]);
 
-        Route::middleware(['role:admin,officer,validator,society'])->group(function() {
+        Route::middleware(['role:admin,officer,validator,society'])->group(function () {
             Route::post("/logout", [AuthController::class, "logout"]);
             Route::post("/refresh-token", [AuthController::class, "refreshToken"]);
             Route::get("/profile", [AuthController::class, "profile"]);
             Route::put("/profile", [AuthController::class, "updateProfile"]);
-            Route::post("/change-password", [AuthController::class, "changePassword"]);
         });
     });
 
-    Route::prefix("admin")->middleware(['role:admin'])->group(function() {
+    Route::prefix("admin")->middleware(['role:admin'])->group(function () {
         // Dashboard & Statistics
         Route::get("/dashboard", [AdminController::class, "dashboard"]);
         Route::get("/statistics", [AdminController::class, "getStatistics"]);
@@ -37,7 +37,7 @@ Route::prefix("v1")->group(function() {
         Route::get("/logs", [AdminController::class, "getSystemLogs"]);
 
         // Regional Management
-        Route::prefix("regionals")->group(function() {
+        Route::prefix("regionals")->group(function () {
             Route::get("/", [AdminController::class, "getAllRegionals"]);
             Route::get("/{id}", [AdminController::class, "getRegionalById"]);
             Route::post("/", [AdminController::class, "createRegional"]);
@@ -46,7 +46,7 @@ Route::prefix("v1")->group(function() {
         });
 
         // Job Category Management
-        Route::prefix("job-categories")->group(function() {
+        Route::prefix("job-categories")->group(function () {
             Route::get("/", [AdminController::class, "getAllJobCategories"]);
             Route::get("/{id}", [AdminController::class, "getJobCategoryById"]);
             Route::post("/", [AdminController::class, "createJobCategory"]);
@@ -55,7 +55,7 @@ Route::prefix("v1")->group(function() {
         });
 
         // Validator Management
-        Route::prefix("validators")->group(function() {
+        Route::prefix("validators")->group(function () {
             Route::get("/", [AdminController::class, "getAllValidators"]);
             Route::get("/{id}", [AdminController::class, "getValidatorById"]);
             Route::post("/", [AdminController::class, "createValidator"]);
@@ -65,7 +65,7 @@ Route::prefix("v1")->group(function() {
         });
 
         // Officer Management
-        Route::prefix("officers")->group(function() {
+        Route::prefix("officers")->group(function () {
             Route::get("/", [AdminController::class, "getAllOfficers"]);
             Route::get("/{id}", [AdminController::class, "getOfficerById"]);
             Route::post("/", [AdminController::class, "createOfficer"]);
@@ -75,7 +75,7 @@ Route::prefix("v1")->group(function() {
         });
 
         // Society Management
-        Route::prefix("societies")->group(function() {
+        Route::prefix("societies")->group(function () {
             Route::get("/", [AdminController::class, "getAllSocieties"]);
             Route::get("/{id}", [AdminController::class, "getSocietyById"]);
             Route::put("/{id}", [AdminController::class, "updateSociety"]);
@@ -85,14 +85,14 @@ Route::prefix("v1")->group(function() {
         });
 
         // Validation Oversight
-        Route::prefix("validations")->group(function() {
+        Route::prefix("validations")->group(function () {
             Route::get("/", [AdminController::class, "getAllValidations"]);
             Route::get("/stats", [AdminController::class, "getValidationStats"]);
             Route::get("/{id}", [AdminController::class, "getValidationById"]);
         });
 
         // Job Vacancy Oversight
-        Route::prefix("job-vacancies")->group(function() {
+        Route::prefix("job-vacancies")->group(function () {
             Route::get("/", [AdminController::class, "getAllJobVacancies"]);
             Route::get("/stats", [AdminController::class, "getJobVacancyStats"]);
             Route::get("/{id}", [AdminController::class, "getJobVacancyById"]);
@@ -102,7 +102,7 @@ Route::prefix("v1")->group(function() {
         });
     });
 
-     Route::prefix("society")->middleware(['role:society'])->group(function() {
+    Route::prefix("society")->middleware(['role:society'])->group(function () {
 
         // Dashboard
         Route::get("/dashboard", [SocietyController::class, "dashboard"]);
@@ -110,13 +110,12 @@ Route::prefix("v1")->group(function() {
         // Profile
         Route::get("/profile", [SocietyController::class, "getProfile"]);
         Route::put("/profile", [SocietyController::class, "updateProfile"]);
-        Route::post("/documents", [SocietyController::class, "uploadDocuments"]);
-
         // Validation
         Route::post("/validation", [SocietyController::class, "submitValidation"]);
         Route::get("/validation", [SocietyController::class, "getValidationStatus"]);
         Route::put("/validation", [SocietyController::class, "updateValidation"]);
         Route::delete("/validation", [SocietyController::class, "cancelValidation"]);
+        Route::get("/get-category", [SocietyController::class, "getJobCategories"]);
 
         // Job Vacancies
         Route::get("/vacancies", [SocietyController::class, "getAllVacancies"]);
@@ -147,7 +146,7 @@ Route::prefix("v1")->group(function() {
         Route::get("/application-history", [SocietyController::class, "getApplicationHistory"]);
     });
 
-    Route::prefix("validator")->middleware(['role:validator,officer'])->group(function() {
+    Route::prefix("validator")->middleware(['role:validator,officer'])->group(function () {
 
         // Dashboard & Stats
         Route::get("/dashboard", [ValidatorController::class, "dashboard"]);
@@ -169,8 +168,13 @@ Route::prefix("v1")->group(function() {
         Route::get("/reports", [ValidatorController::class, "generateMyReport"]);
     });
 
-    Route::prefix("officer")->middleware(['role:officer'])->group(function() {
+    Route::prefix("officer")->middleware(['role:officer'])->group(function () {
         // Job Vacancy Management
+        Route::get("/dashboard", [ValidatorController::class, "officerDashboard"]);
+
+        Route::get("/categories", [ValidatorController::class, "getJobCategories"]);
+        Route::get("/vacancies/{id}", [ValidatorController::class, "getMyJobVacancyDetail"]);
+
         Route::get("/vacancies", [ValidatorController::class, "getMyJobVacancies"]);
         Route::post("/vacancies", [ValidatorController::class, "createJobVacancy"]);
         Route::put("/vacancies/{id}", [ValidatorController::class, "updateJobVacancy"]);
@@ -187,26 +191,25 @@ Route::prefix("v1")->group(function() {
         Route::post("/applications/bulk-process", [ValidatorController::class, "bulkProcessApplications"]);
     });
 
-    Route::prefix("validations")->group(function() {
-        Route::middleware(['role:officer,validator'])->group(function() {
+    Route::prefix("validations")->group(function () {
+        Route::middleware(['role:officer,validator'])->group(function () {
             Route::post("/", [ValidationController::class, "validation"]);
         });
 
-        Route::middleware(['role:admin,officer,validator,society'])->group(function() {
+        Route::middleware(['role:admin,officer,validator,society'])->group(function () {
             Route::get("/", [ValidationController::class, "getValidation"]);
         });
     });
 
-    Route::prefix("job_vacancies")->group(function() {
-        Route::middleware(['role:society,admin,officer,validator'])->group(function() {
+    Route::prefix("job_vacancies")->group(function () {
+        Route::middleware(['role:society,admin,officer,validator'])->group(function () {
             Route::get("/", [JobVacancyController::class, "getAllVacancy"]);
             Route::get("/{id}", [JobVacancyController::class, "getDetailVacancy"]);
         });
-
     });
 
-    Route::prefix("applications")->group(function() {
-        Route::middleware(['role:society'])->group(function() {
+    Route::prefix("applications")->group(function () {
+        Route::middleware(['role:society'])->group(function () {
             Route::post("/", [ApplyJobController::class, "ApplyJob"]);
             Route::get("/my", [ApplyJobController::class, "getSocietyJob"]);
         });

@@ -21,7 +21,7 @@ class User extends Authenticatable
         "email",
         "password",
         "role",
-        "unreadable_type",
+        "userable_type",
         "userable_id",
         "login_tokens",
         "last_login_at",

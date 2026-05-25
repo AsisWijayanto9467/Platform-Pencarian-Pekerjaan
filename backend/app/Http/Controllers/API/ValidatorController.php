@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Validator;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\AvailablePosition;
@@ -532,6 +532,252 @@ class ValidatorController extends Controller
         }
     }
 
+    public function officerDashboard(Request $request)
+    {
+        $validator = $this->getAuthenticatedValidator($request);
+
+        if (!$validator) {
+            return response()->json(["message" => "Unauthorized user"], 401);
+        }
+
+        // Base dashboard data untuk semua role
+        $dashboard = [
+            'profile' => [
+                'id' => $validator->id,
+                'name' => $validator->name,
+                'employee_id' => $validator->employee_id,
+                'role' => $validator->role,
+                'regional' => $validator->regional ? [
+                    'province' => $validator->regional->province,
+                    'district' => $validator->regional->district,
+                ] : null,
+            ],
+            'validation_stats' => [
+                'total_handled' => Validation::where('validator_id', $validator->id)->count(),
+                'pending' => Validation::where('validator_id', $validator->id)->where('status', 'pending')->count(),
+                'accepted' => Validation::where('validator_id', $validator->id)->where('status', 'accepted')->count(),
+                'declined' => Validation::where('validator_id', $validator->id)->where('status', 'declined')->count(),
+                'total_pending_all' => Validation::where('status', 'pending')->count(),
+            ],
+            'recent_validations' => Validation::with(['society:id,name,id_card_number', 'jobCategory:id,job_category'])
+                ->where('validator_id', $validator->id)
+                ->latest()
+                ->take(5)
+                ->get(),
+            'unassigned_validations' => Validation::with(['society:id,name,id_card_number', 'jobCategory:id,job_category'])
+                ->whereNull('validator_id')
+                ->where('status', 'pending')
+                ->count(),
+        ];
+
+        // Jika OFFICER, tambahkan data spesifik officer
+        if ($validator->role === 'officer') {
+            // Job Vacancy Stats
+            $totalVacancies = JobVacancy::count();
+            $vacanciesThisMonth = JobVacancy::whereMonth('created_at', Carbon::now()->month)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->count();
+            $vacanciesByCategory = JobVacancy::select('job_category_id', DB::raw('count(*) as total'))
+                ->with('jobCategory:id,job_category')
+                ->groupBy('job_category_id')
+                ->get();
+            $recentVacancies = JobVacancy::with(['jobCategory:id,job_category', 'availablePositions'])
+                ->withCount('jobApplySocieties')
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $dashboard['job_vacancy_stats'] = [
+                'total_vacancies' => $totalVacancies,
+                'vacancies_this_month' => $vacanciesThisMonth,
+                'total_positions' => AvailablePosition::count(),
+                'vacancies_by_category' => $vacanciesByCategory,
+                'recent_vacancies' => $recentVacancies,
+            ];
+
+            // Application Stats
+            $totalApplications = JobApplyPosition::count();
+            $pendingApplications = JobApplyPosition::where('status', 'pending')->count();
+            $acceptedApplications = JobApplyPosition::where('status', 'accepted')->count();
+            $rejectedApplications = JobApplyPosition::where('status', 'rejected')->count();
+
+            $applicationsThisMonth = JobApplyPosition::whereMonth('created_at', Carbon::now()->month)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->count();
+
+            $applicationsByVacancy = JobApplyPosition::select('job_vacancy_id', DB::raw('count(*) as total'))
+                ->with('jobVacancy:id,company')
+                ->groupBy('job_vacancy_id')
+                ->orderBy('total', 'desc')
+                ->take(5)
+                ->get();
+
+            $recentApplications = JobApplyPosition::with([
+                    'society:id,name,id_card_number',
+                    'jobVacancy:id,company',
+                    'availablePosition:id,position'
+                ])
+                ->latest()
+                ->take(10)
+                ->get();
+
+            $dashboard['application_stats'] = [
+                'total' => $totalApplications,
+                'pending' => $pendingApplications,
+                'accepted' => $acceptedApplications,
+                'rejected' => $rejectedApplications,
+                'this_month' => $applicationsThisMonth,
+                'by_vacancy' => $applicationsByVacancy,
+                'recent_applications' => $recentApplications,
+            ];
+
+            // Application Status Distribution
+            $applicationStatusDistribution = [
+                ['status' => 'pending', 'total' => $pendingApplications, 'color' => '#f39c12', 'label' => 'Pending'],
+                ['status' => 'accepted', 'total' => $acceptedApplications, 'color' => '#2ecc71', 'label' => 'Accepted'],
+                ['status' => 'rejected', 'total' => $rejectedApplications, 'color' => '#e74c3c', 'label' => 'Rejected'],
+            ];
+
+            $dashboard['application_status_distribution'] = $applicationStatusDistribution;
+
+            // Vacancy Stats Detail
+            $topVacancies = JobVacancy::withCount('jobApplySocieties')
+                ->with(['jobCategory:id,job_category'])
+                ->orderBy('job_apply_societies_count', 'desc')
+                ->take(10)
+                ->get()
+                ->map(function($vacancy) {
+                    return [
+                        'id' => $vacancy->id,
+                        'company' => $vacancy->company,
+                        'category' => $vacancy->jobCategory->job_category ?? '-',
+                        'total_positions' => $vacancy->availablePositions->count(),
+                        'total_applicants' => $vacancy->job_apply_societies_count,
+                        'created_at' => $vacancy->created_at->toDateString(),
+                    ];
+                });
+
+            $dashboard['top_vacancies'] = $topVacancies;
+
+            // Today's Summary
+            $dashboard['today_summary'] = [
+                'new_applications_today' => JobApplyPosition::whereDate('created_at', Carbon::today())->count(),
+                'processed_today' => JobApplyPosition::whereDate('updated_at', Carbon::today())
+                    ->whereIn('status', ['accepted', 'rejected'])
+                    ->count(),
+                'validations_today' => Validation::where('validator_id', $validator->id)
+                    ->whereDate('updated_at', Carbon::today())
+                    ->count(),
+                'vacancies_created_today' => JobVacancy::whereDate('created_at', Carbon::today())->count(),
+            ];
+
+            // Monthly Trends (6 bulan terakhir)
+            $monthlyTrends = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $month = Carbon::now()->subMonths($i);
+                $monthlyTrends[] = [
+                    'month' => $month->format('M Y'),
+                    'month_num' => $month->month,
+                    'year' => $month->year,
+                    'applications' => JobApplyPosition::whereMonth('created_at', $month->month)
+                        ->whereYear('created_at', $month->year)
+                        ->count(),
+                    'vacancies' => JobVacancy::whereMonth('created_at', $month->month)
+                        ->whereYear('created_at', $month->year)
+                        ->count(),
+                    'validations' => Validation::where('validator_id', $validator->id)
+                        ->whereMonth('updated_at', $month->month)
+                        ->whereYear('updated_at', $month->year)
+                        ->count(),
+                ];
+            }
+
+            $dashboard['monthly_trends'] = $monthlyTrends;
+
+            // Quick Stats for Cards
+            $dashboard['quick_stats'] = [
+                [
+                    'title' => 'Total Lowongan',
+                    'value' => $totalVacancies,
+                    'icon' => 'fas fa-briefcase',
+                    'bgColor' => '#e74c3c',
+                    'subtitle' => 'Lowongan Aktif',
+                    'link' => '/officer/vacancies',
+                ],
+                [
+                    'title' => 'Total Lamaran',
+                    'value' => $totalApplications,
+                    'icon' => 'fas fa-file-alt',
+                    'bgColor' => '#3498db',
+                    'subtitle' => 'Lamaran Masuk',
+                    'link' => '/officer/applications',
+                ],
+                [
+                    'title' => 'Lamaran Pending',
+                    'value' => $pendingApplications,
+                    'icon' => 'fas fa-clock',
+                    'bgColor' => '#f39c12',
+                    'subtitle' => 'Perlu Diproses',
+                    'link' => '/officer/applications?status=pending',
+                ],
+                [
+                    'title' => 'Lamaran Diterima',
+                    'value' => $acceptedApplications,
+                    'icon' => 'fas fa-check-circle',
+                    'bgColor' => '#2ecc71',
+                    'subtitle' => 'Disetujui',
+                ],
+                [
+                    'title' => 'Lamaran Ditolak',
+                    'value' => $rejectedApplications,
+                    'icon' => 'fas fa-times-circle',
+                    'bgColor' => '#e74c3c',
+                    'subtitle' => 'Dikembalikan',
+                ],
+                [
+                    'title' => 'Validasi Tertunda',
+                    'value' => $dashboard['validation_stats']['pending'],
+                    'icon' => 'fas fa-hourglass-half',
+                    'bgColor' => '#9b59b6',
+                    'subtitle' => 'Milik Saya',
+                ],
+                [
+                    'title' => 'Total Posisi',
+                    'value' => AvailablePosition::count(),
+                    'icon' => 'fas fa-list-ol',
+                    'bgColor' => '#1abc9c',
+                    'subtitle' => 'Posisi Tersedia',
+                ],
+                [
+                    'title' => 'Lowongan Bulan Ini',
+                    'value' => $vacanciesThisMonth,
+                    'icon' => 'fas fa-calendar-alt',
+                    'bgColor' => '#e67e22',
+                    'subtitle' => Carbon::now()->format('F Y'),
+                ],
+            ];
+
+            // Pending applications that need attention (older than 7 days)
+            $oldPendingApplications = JobApplyPosition::with(['society:id,name', 'jobVacancy:id,company'])
+                ->where('status', 'pending')
+                ->where('created_at', '<', Carbon::now()->subDays(7))
+                ->count();
+
+            $dashboard['attention_needed'] = [
+                'old_pending_applications' => $oldPendingApplications,
+                'unassigned_validations' => $dashboard['unassigned_validations'],
+                'urgent_notifications' => Notification::where('user_id', $validator->user->id ?? 0)
+                    ->where('created_at', '>=', Carbon::now()->subDays(7))
+                    ->count(),
+            ];
+        }
+
+        return response()->json([
+            'message' => 'Dashboard retrieved successfully',
+            'data' => $dashboard
+        ], 200);
+    }
+
     public function getMyJobVacancies(Request $request)
     {
         $validator = $this->getAuthenticatedValidator($request);
@@ -936,6 +1182,40 @@ class ValidatorController extends Controller
         return response()->json([
             'message' => 'Profile updated successfully',
             'data' => $validator->fresh()->load('regional', 'user')
+        ], 200);
+    }
+
+    public function getJobCategories(Request $request)
+    {
+        $validator = $this->getAuthenticatedValidator($request);
+
+        if (!$validator) {
+            return response()->json(["message" => "Unauthorized user"], 401);
+        }
+
+        $categories = \App\Models\JobCategory::all();
+
+        return response()->json([
+            'message' => 'Job categories retrieved successfully',
+            'data' => $categories
+        ], 200);
+    }
+
+    public function getMyJobVacancyDetail(Request $request, $id)
+    {
+        $validator = $this->getAuthenticatedValidator($request);
+
+        if (!$validator || $validator->role !== 'officer') {
+            return response()->json(["message" => "Unauthorized"], 403);
+        }
+
+        $vacancy = JobVacancy::with(['jobCategory', 'availablePositions'])
+            ->withCount(['jobApplySocieties'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'message' => 'Vacancy detail retrieved successfully',
+            'data' => $vacancy
         ], 200);
     }
 }

@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from "../../services/api";
 
 export default function Login() {
     const [loading, setloading] = useState(false);
+    const [error, setError] = useState("");
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -11,24 +12,49 @@ export default function Login() {
     const handleSubmit = async(e) => {
         e.preventDefault();
         setloading(true);
+        setError("");
 
         try {
             const res = await api.post("/auth/login", {
-                id_card_number : email,
-                password
+                email: email,
+                password: password
             });
 
-            const token = res.data.token;
+            const token = res.data.data.token;
+            const userData = res.data.data.user;
+            const profileData = res.data.data.profile;
+
             localStorage.setItem("token", token);
-            navigate("/dashboard");
+            localStorage.setItem("user", JSON.stringify(userData));
+            localStorage.setItem("profile", JSON.stringify(profileData));
+
+            switch (userData.role) {
+                case 'admin':
+                    navigate("/admin/dashboard");
+                    break;
+                case 'officer':
+                    navigate("/officer/dashboard");
+                    break;
+                case 'validator':
+                    navigate("/validator/dashboard");
+                    break;
+                case 'society':
+                    navigate("/dashboard");
+                    break;
+                default:
+                    navigate("/dashboard");
+            }
         } catch (err) {
-            console.log(err)
+            if (err.response && err.response.data && err.response.data.message) {
+                setError(err.response.data.message);
+            } else {
+                setError("Login failed. Please try again.");
+            }
+            console.log(err);
         } finally {
             setloading(false);
         }
     }
-
-
 
     return (
         <>
@@ -64,17 +90,56 @@ export default function Login() {
                                     <h4 className="mb-0">Login</h4>
                                 </div>
                                 <div className="card-body">
+                                    {error && (
+                                        <div className="alert alert-danger" role="alert">
+                                            {error}
+                                        </div>
+                                    )}
                                     <div className="form-group row align-items-center">
-                                        <div className="col-4 text-right">ID Card Number</div>
-                                        <div className="col-8"><input value={email} onChange={(e) => setEmail(e.target.value)} name="email" type="text" className="form-control" /></div>
+                                        <div className="col-4 text-right">Email</div>
+                                        <div className="col-8">
+                                            <input 
+                                                value={email} 
+                                                onChange={(e) => setEmail(e.target.value)} 
+                                                name="email" 
+                                                type="email" 
+                                                className="form-control" 
+                                                placeholder="Enter your email"
+                                                required 
+                                            />
+                                        </div>
                                     </div>
                                     <div className="form-group row align-items-center mt-3">
                                         <div className="col-4 text-right">Password</div>
-                                        <div className="col-8"><input value={password} onChange={(e) => setPassword(e.target.value)} name="password" type="password" className="form-control" /></div>
+                                        <div className="col-8">
+                                            <input 
+                                                value={password} 
+                                                onChange={(e) => setPassword(e.target.value)} 
+                                                name="password" 
+                                                type="password" 
+                                                className="form-control" 
+                                                placeholder="Enter your password"
+                                                required 
+                                            />
+                                        </div>
                                     </div>
                                     <div className="form-group row align-items-center mt-4">
                                         <div className="col-4"></div>
-                                        <div className="col-8"><button className="btn btn-primary" type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button></div>
+                                        <div className="col-8">
+                                            <button 
+                                                className="btn btn-primary" 
+                                                type="submit" 
+                                                disabled={loading}
+                                            >
+                                                {loading ? "Logging in..." : "Login"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="text-center mt-3">
+                                        <span>Don't have account? </span>
+                                        <Link to="/register">
+                                            Register here
+                                        </Link>
                                     </div>
                                 </div>
                             </form>

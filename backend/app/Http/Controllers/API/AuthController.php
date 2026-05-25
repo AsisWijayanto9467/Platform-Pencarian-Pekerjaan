@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Regional;
 use App\Models\Society;
 use App\Models\User;
 use App\Models\Validator;
@@ -107,6 +108,27 @@ class AuthController extends Controller
         return response()->json([
             "message" => "Login successful",
             "data" => $responseData
+        ], 200);
+    }
+
+    public function getRegionals()
+    {
+        $regionals = Regional::withCount(['societies', 'validators'])
+            ->get()
+            ->map(function ($regional) {
+                return [
+                    'id' => $regional->id,
+                    'province' => $regional->province,
+                    'district' => $regional->district,
+                    'total_societies' => $regional->societies_count,
+                    'total_validators' => $regional->validators_count,
+                    'created_at' => $regional->created_at,
+                ];
+            });
+
+        return response()->json([
+            'message' => 'Regionals retrieved successfully',
+            'data' => $regionals
         ], 200);
     }
 
@@ -316,7 +338,7 @@ class AuthController extends Controller
     }
 
     // Update profile
-    public function updateProfile(Request $request)
+     public function updateProfile(Request $request)
     {
         $user = $request->user();
 
@@ -326,100 +348,106 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // 🔐 Handle change password jika ada
+        if ($request->filled('current_password') || $request->filled('new_password')) {
+            $request->validate([
+                "current_password" => "required",
+                "new_password" => "required|min:6|different:current_password"
+            ]);
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    "message" => "Current password is incorrect"
+                ], 400);
+            }
+
+            $newHashedPassword = Hash::make($request->new_password);
+
+            // Update password di users
+            $user->update([
+                "password" => $newHashedPassword
+            ]);
+
+            // Update password di tabel role-specific
+            switch ($user->role) {
+                case 'society':
+                    Society::where('id', $user->userable_id)
+                        ->update(["password" => $newHashedPassword]);
+                    break;
+
+                case 'admin':
+                    Admin::where('id', $user->userable_id)
+                        ->update(["password" => $newHashedPassword]);
+                    break;
+            }
+        }
+
+        // 📝 Handle update profile fields jika ada
+        $profileUpdated = false;
+
         switch ($user->role) {
             case 'society':
-                $request->validate([
-                    "name" => "sometimes|string|max:255",
-                    "born_date" => "sometimes|date",
-                    "gender" => "sometimes|in:male,female",
-                    "address" => "sometimes|string",
-                    "regional_id" => "sometimes|exists:regionals,id"
-                ]);
+                if ($request->hasAny(['name', 'born_date', 'gender', 'address', 'regional_id'])) {
+                    $request->validate([
+                        "name" => "sometimes|string|max:255",
+                        "born_date" => "sometimes|date",
+                        "gender" => "sometimes|in:male,female",
+                        "address" => "sometimes|string",
+                        "regional_id" => "sometimes|exists:regionals,id"
+                    ]);
 
-                $society = Society::find($user->userable_id);
-                if ($society) {
-                    $society->update($request->only([
-                        'name', 'born_date', 'gender', 'address', 'regional_id'
-                    ]));
+                    Society::where('id', $user->userable_id)
+                        ->update($request->only([
+                            'name', 'born_date', 'gender', 'address', 'regional_id'
+                        ]));
+
+                    $profileUpdated = true;
                 }
                 break;
 
             case 'officer':
             case 'validator':
-                $request->validate([
-                    "name" => "sometimes|string|max:255",
-                    "phone" => "sometimes|string|max:20"
-                ]);
+                if ($request->hasAny(['name', 'phone'])) {
+                    $request->validate([
+                        "name" => "sometimes|string|max:255",
+                        "phone" => "sometimes|string|max:20"
+                    ]);
 
-                $validator = Validator::where('user_id', $user->id)->first();
-                if ($validator) {
-                    $validator->update($request->only(['name', 'phone']));
+                    Validator::where('user_id', $user->id)
+                        ->update($request->only(['name', 'phone']));
+
+                    $profileUpdated = true;
                 }
                 break;
 
             case 'admin':
-                $request->validate([
-                    "name" => "sometimes|string|max:255"
-                ]);
+                if ($request->has('name')) {
+                    $request->validate([
+                        "name" => "sometimes|string|max:255"
+                    ]);
 
-                $admin = Admin::find($user->userable_id);
-                if ($admin) {
-                    $admin->update(['name' => $request->name]);
+                    Admin::where('id', $user->userable_id)
+                        ->update(['name' => $request->name]);
+
+                    $profileUpdated = true;
                 }
                 break;
         }
 
-        return response()->json([
-            "message" => "Profile updated successfully"
-        ], 200);
-    }
-
-    // Change password
-    public function changePassword(Request $request)
-    {
-        $user = $request->user();
-
-        if (!$user) {
+        // Jika tidak ada yang diupdate
+        if (!$profileUpdated && !$request->filled('current_password')) {
             return response()->json([
-                "message" => "Unauthenticated"
-            ], 401);
-        }
-
-        $request->validate([
-            "current_password" => "required",
-            "new_password" => "required|min:6|different:current_password"
-        ]);
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json([
-                "message" => "Current password is incorrect"
+                "message" => "No changes provided"
             ], 400);
         }
 
-        $newHashedPassword = Hash::make($request->new_password);
-
-        $user->update([
-            "password" => $newHashedPassword
-        ]);
-
-        switch ($user->role) {
-            case 'society':
-                $society = Society::find($user->userable_id);
-                if ($society) {
-                    $society->update(["password" => $newHashedPassword]);
-                }
-                break;
-
-            case 'admin':
-                $admin = Admin::find($user->userable_id);
-                if ($admin) {
-                    $admin->update(["password" => $newHashedPassword]);
-                }
-                break;
-        }
+        // Return response
+        $message = [];
+        if ($profileUpdated) $message[] = "Profile updated";
+        if ($request->filled('current_password')) $message[] = "Password changed";
 
         return response()->json([
-            "message" => "Password changed successfully"
+            "message" => implode(" and ", $message) . " successfully"
         ], 200);
     }
 

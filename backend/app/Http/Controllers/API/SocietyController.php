@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Society;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\AvailablePosition;
@@ -173,23 +173,8 @@ class SocietyController extends Controller
         ], 200);
     }
 
-    public function uploadDocuments(Request $request)
-    {
-        $society = $this->getAuthenticatedSociety($request);
 
-        if (!$society) {
-            return response()->json(["message" => "Unauthorized user"], 401);
-        }
 
-        // Karena tabel societies tidak memiliki kolom dokumen,
-        // kita simpan informasi upload sebagai catatan atau return success
-        // Untuk implementasi nyata, bisa ditambahkan migration untuk kolom dokumen
-
-        return response()->json([
-            'message' => 'Document upload feature ready. Add document columns to societies table to enable.',
-            'note' => 'Run migration: ALTER TABLE societies ADD COLUMN documents TEXT NULL;'
-        ], 200);
-    }
 
     // ============= VALIDATION MANAGEMENT =============
 
@@ -369,6 +354,28 @@ class SocietyController extends Controller
 
         return response()->json([
             "message" => "Validation cancelled successfully"
+        ], 200);
+    }
+
+    public function getJobCategories()
+    {
+        $categories = JobCategory::withCount(['validations', 'jobVacancies'])
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'job_category' => $category->job_category,
+                    'description' => $category->description,
+                    'is_active' => $category->is_active,
+                    'total_validations' => $category->validations_count,
+                    'total_vacancies' => $category->job_vacancies_count,
+                    'created_at' => $category->created_at,
+                ];
+            });
+
+        return response()->json([
+            'message' => 'Job categories retrieved successfully',
+            'data' => $categories
         ], 200);
     }
 

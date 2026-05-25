@@ -17,4 +17,8 @@ class JobCategory extends Model
     public function Validations() {
         return $this->hasMany(Validation::class);
     }
+
+    public function jobVacancies() {
+        return $this->hasMany(JobVacancy::class);
+    }
 }
