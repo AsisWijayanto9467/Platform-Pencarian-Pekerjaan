@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPortal - Kelola Lowongan</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; background-color: #f5f5f5; overflow-x: hidden; }
+        
+        .sidebar { height: 100vh; width: 280px; position: fixed; left: 0; top: 0; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-x: hidden; display: flex; flex-direction: column; background: #343a40; transition: all 0.3s ease; }
+        .sidebar.collapsed { width: 70px; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .main-content { margin-left: 280px; min-height: 100vh; padding-top: 60px; transition: all 0.3s ease; }
+        .main-content.expanded { margin-left: 70px; }
+        .fixed-header { position: fixed; top: 0; right: 0; left: 280px; z-index: 998; height: 60px; background: white; border-bottom: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+        .fixed-header.expanded { left: 70px; }
+        
+        .nav-link-custom { color: rgba(255,255,255,0.7) !important; border-left: 3px solid transparent; text-decoration: none; display: flex; align-items: center; padding: 10px 16px; border-radius: 4px; margin-bottom: 2px; transition: all 0.2s ease; font-size: 0.9rem; }
+        .nav-link-custom:hover { color: #fff !important; background-color: rgba(255,255,255,0.1); }
+        .nav-link-custom.active { color: #fff !important; background-color: rgba(230, 126, 34, 0.8); border-left-color: #e67e22; }
+        
+        .badge-officer { background-color: #0d6efd; color: white; }
+        .header-gradient-orange { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); border-radius: 12px; color: white; }
+        .table th { border-top: none; font-size: 0.8rem; color: #888; font-weight: 600; }
+        .table td { font-size: 0.85rem; vertical-align: middle; }
+        
+        .modal-backdrop-custom { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-custom { background: white; border-radius: 8px; width: 650px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal-lg-custom { width: 800px; }
+        .modal-sm-custom { width: 450px; }
+        .modal-header-custom { padding: 16px 20px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0; }
+        .modal-body-custom { padding: 20px; }
+        .modal-footer-custom { padding: 16px 20px; border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; gap: 10px; }
+        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0; color: inherit; }
+        .close-btn:hover { opacity: 0.8; }
+        
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.mobile-open { transform: translateX(0); } .sidebar-overlay.show { display: block; } .main-content { margin-left: 0; } .main-content.expanded { margin-left: 0; } .fixed-header { left: 0; } .fixed-header.expanded { left: 0; } }
+        .sidebar::-webkit-scrollbar { width: 4px; } .sidebar::-webkit-scrollbar-track { background: transparent; } .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar bg-dark text-white" id="sidebar">
+        <div class="d-flex align-items-center border-bottom border-secondary flex-shrink-0" style="padding: 14px 18px; height: 60px;">
+            <div class="d-flex align-items-center w-100" id="sidebarHeaderExpanded">
+                <div class="bg-primary rounded d-flex align-items-center justify-content-center me-3" style="width: 38px; height: 38px; min-width: 38px;"><i class="fas fa-briefcase text-white" style="font-size: 18px;"></i></div>
+                <div class="flex-grow-1 min-width-0"><h6 class="mb-0 text-white fw-bold text-truncate" style="font-size: 1.1rem;">JobPortal</h6><small class="text-white-50 text-capitalize" style="font-size: 0.7rem;">Officer</small></div>
+                <button class="btn btn-link text-white p-0 ms-2" id="sidebarToggleBtn" style="text-decoration: none;"><i class="fas fa-chevron-left" style="font-size: 16px;"></i></button>
+            </div>
+            <div id="sidebarHeaderCollapsed" style="display: none;"><button class="btn btn-link text-white p-0 mx-auto" id="sidebarExpandBtn" style="text-decoration: none;"><i class="fas fa-bars" style="font-size: 20px;"></i></button></div>
+        </div>
+        <div class="border-bottom border-secondary flex-shrink-0" style="padding: 14px 18px;" id="sidebarUserProfile">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><span class="fw-bold text-dark" style="font-size: 1.1rem;">O</span></div>
+                <div class="flex-grow-1 min-width-0"><p class="mb-1 text-white text-truncate" style="font-size: 0.95rem; font-weight: 500;">Officer User</p><span class="badge text-capitalize badge-officer" style="font-size: 0.8rem; padding: 4px 8px;">Officer</span></div>
+            </div>
+        </div>
+        <div class="flex-grow-1 overflow-auto" style="padding: 12px 8px;" id="sidebarNav">
+            <a href="/officer/dashboard" class="nav-link-custom" data-path="/officer/dashboard"><i class="fas fa-tachometer-alt" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i><span class="flex-grow-1">Dashboard</span></a>
+            <a href="/officer/profile" class="nav-link-custom" data-path="/officer/profile"><i class="fas fa-user-circle" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i><span class="flex-grow-1">Profil Saya</span></a>
+            <a href="/officer/vacancies" class="nav-link-custom active" data-path="/officer/vacancies"><i class="fas fa-briefcase" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i><span class="flex-grow-1">Lowongan Saya</span><i class="fas fa-chevron-right" style="font-size: 12px;"></i></a>
+            <a href="/officer/applications" class="nav-link-custom" data-path="/officer/applications"><i class="fas fa-file-alt" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i><span class="flex-grow-1">Lamaran Masuk</span></a>
+        </div>
+        <div class="border-top border-secondary flex-shrink-0" style="padding: 14px 18px;" id="sidebarFooterExpanded"><button class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center" id="logoutBtnSidebar" style="font-size: 0.9rem; padding: 8px;"><i class="fas fa-sign-out-alt me-2" style="font-size: 16px;"></i>Logout</button></div>
+        <div class="border-top border-secondary flex-shrink-0" style="padding: 10px; display: none;" id="sidebarFooterCollapsed"><button class="btn btn-link text-white p-0 mx-auto d-flex" id="logoutBtnCollapsed" style="text-decoration: none;" title="Logout"><i class="fas fa-sign-out-alt" style="font-size: 20px;"></i></button></div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <header class="fixed-header" id="fixedHeader">
+            <div class="container-fluid h-100" style="padding: 0 24px;">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-light d-md-none me-3" id="mobileMenuBtn" style="padding: 6px 10px;"><i class="fas fa-bars" style="font-size: 18px;"></i></button>
+                        <div><h6 class="mb-0 text-dark fw-bold" style="line-height: 1.3; font-size: 1.1rem;">Lowongan Saya</h6><small class="text-muted">Selamat datang, Officer User</small></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge badge-officer d-none d-md-inline-block text-capitalize" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fas fa-user-tie me-1"></i>Officer</span>
+                        <div class="dropdown">
+                            <button class="btn btn-light position-relative" type="button" data-bs-toggle="dropdown" style="padding: 8px 12px;"><i class="fas fa-bell"></i><span class="badge bg-danger position-absolute" style="top: 4px; right: 4px; font-size: 10px; padding: 3px 6px; line-height: 1;">3</span></button>
+                            <div class="dropdown-menu dropdown-menu-end shadow" style="width: 300px; margin-top: 8px;"><h6 class="dropdown-header">Notifikasi</h6><div class="dropdown-divider"></div><a class="dropdown-item py-2" href="#"><i class="fas fa-check-circle text-success me-2"></i>Permintaan validasi baru</a><a class="dropdown-item py-2" href="#"><i class="fas fa-file-alt text-primary me-2"></i>Status lamaran diperbarui</a><a class="dropdown-item py-2" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Persetujuan tertunda</a></div>
+                        </div>
+                        <button class="btn btn-light d-flex align-items-center" style="padding: 8px 14px;"><div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;"><span class="text-white" style="font-weight: bold;">O</span></div><span class="d-none d-md-inline">Officer User</span></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <main class="flex-grow-1" style="background-color: #f5f5f5; padding: 24px;">
+            <div class="container-fluid px-0">
+                <!-- Success/Error Banners -->
+                <div id="successBanner" class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius: 10px; display: none;"><i class="fas fa-check-circle me-2"></i><strong>Berhasil!</strong> <span id="successText"></span><button type="button" class="btn-close" onclick="hideBanner('successBanner')"></button></div>
+                <div id="errorBanner" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius: 10px; display: none;"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorText"></span><button type="button" class="btn-close" onclick="hideBanner('errorBanner')"></button></div>
+
+                <!-- Header -->
+                <div class="row mb-4"><div class="col-12"><div class="card border-0 shadow-sm header-gradient-orange"><div class="card-body p-4"><div class="d-flex align-items-center justify-content-between"><div><h4 class="text-white mb-2 fw-bold"><i class="fas fa-briefcase me-2"></i>Kelola Lowongan</h4><p class="text-white-50 mb-0" style="font-size: 0.95rem;">Manajemen lowongan pekerjaan</p></div><button class="btn btn-light" onclick="handleCreateClick()" style="border-radius: 10px; font-weight: 600;"><i class="fas fa-plus-circle me-2"></i>Tambah Lowongan</button></div></div></div></div></div>
+
+                <!-- Filter -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;"><div class="card-body p-4"><div class="row align-items-center">
+                    <div class="col-md-4 mb-2 mb-md-0"><div class="input-group"><span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;"><i class="fas fa-search text-muted"></i></span><input type="text" class="form-control border-start-0" id="searchInput" placeholder="Cari perusahaan..." style="border-radius: 0 10px 10px 0; font-size: 0.9rem;" onkeydown="if(event.key==='Enter')handleSearch()"></div></div>
+                    <div class="col-md-3 mb-2 mb-md-0"><select class="form-select" id="filterCategory" onchange="handleSearch()" style="border-radius: 10px; font-size: 0.9rem;"><option value="">Semua Kategori</option><option value="1">IT</option><option value="2">Manufaktur</option><option value="3">Hospitality</option><option value="4">Pendidikan</option></select></div>
+                    <div class="col-md-5 text-md-end"><button class="btn btn-warning me-2" onclick="handleSearch()" style="border-radius: 10px;"><i class="fas fa-search me-2"></i>Cari</button><button class="btn btn-outline-secondary me-2" onclick="handleResetFilter()" style="border-radius: 10px;"><i class="fas fa-redo"></i></button><button class="btn btn-outline-warning" onclick="renderTable()" style="border-radius: 10px;"><i class="fas fa-sync-alt"></i></button></div>
+                </div></div></div>
+
+                <!-- Table -->
+                <div class="card border-0 shadow-sm" style="border-radius: 12px;"><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover mb-0">
+                    <thead style="background-color: #f8f9fa;"><tr><th class="ps-4" style="border-top: none; font-size: 0.8rem; color: #888; font-weight: 600;">#</th><th style="border-top: none; font-size: 0.8rem; color: #888; font-weight: 600;">PERUSAHAAN</th><th style="border-top: none; font-size: 0.8rem; color: #888; font-weight: 600;">KATEGORI</th><th class="text-center" style="border-top: none; font-size: 0.8rem; color: #888; font-weight: 600;">POSISI</th><th class="text-center" style="border-top: none; font-size: 0.8rem; color: #888; font-weight: 600;">PELAMAR</th><th style="border-top: none; font-size: 0.8rem; color: #888; font-weight: 600;">TANGGAL</th><th class="text-center pe-4" style="border-top: none; font-size: 0.8rem; color: #888; font-weight: 600;">AKSI</th></tr></thead>
+                    <tbody id="tableBody"></tbody>
+                </table></div></div>
+                <div class="card-footer bg-white border-0 pb-4" style="border-radius: 0 0 12px 12px;"><div class="d-flex justify-content-between align-items-center"><small class="text-muted" id="paginationInfo"></small><nav><ul class="pagination pagination-sm mb-0" id="paginationNav"></ul></nav></div></div></div>
+            </div>
+        </main>
+        
+        <footer class="bg-white border-top" style="padding: 14px 24px;"><div class="d-flex justify-content-between align-items-center"><small class="text-muted" style="font-size: 0.9rem;">&copy; 2026 JobPortal - Sistem Pencari Kerja</small><small class="text-muted" style="font-size: 0.9rem;"><i class="fas fa-shield-alt me-1"></i>Sistem Terproteksi</small></div></footer>
+    </div>
+    
+    <!-- Alert Modal -->
+    <div class="modal-backdrop-custom" id="alertModal" style="display: none;"><div class="modal-custom modal-sm-custom" onclick="event.stopPropagation()"><div class="modal-body-custom text-center py-4"><div class="mb-3"><i class="fas fa-exclamation-triangle" id="alertIcon" style="font-size: 64px; color: #ffc107;"></i></div><h5 id="alertTitle" style="color: #ffc107;"></h5><p class="text-muted mb-0" id="alertMessage" style="white-space: pre-line;"></p></div><div class="modal-footer-custom justify-content-center"><button class="btn btn-primary px-4" onclick="hideAlertModal()" style="border-radius: 8px;">OK</button></div></div></div>
+
+    <!-- Create/Edit Modal -->
+    <div class="modal-backdrop-custom" id="formModal" style="display: none;"><div class="modal-custom modal-lg-custom" onclick="event.stopPropagation()"><div class="modal-header-custom text-white" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);"><h5 class="modal-title" id="formModalTitle"><i class="fas fa-plus-circle me-2"></i>Tambah Lowongan</h5><button class="close-btn text-white" onclick="hideFormModal()"><i class="fas fa-times"></i></button></div>
+            <form id="vacancyForm" onsubmit="handleSubmitForm(event)">
+                <div class="modal-body-custom">
+                    <div class="row"><div class="col-md-6"><div class="mb-3"><label class="form-label"><i class="fas fa-tag me-1" style="color: #9b59b6;"></i>Kategori <span class="text-danger">*</span></label><select name="job_category_id" id="formCategory" class="form-select" required><option value="">-- Pilih Kategori --</option><option value="1">IT</option><option value="2">Manufaktur</option><option value="3">Hospitality</option><option value="4">Pendidikan</option></select></div></div><div class="col-md-6"><div class="mb-3"><label class="form-label"><i class="fas fa-building me-1" style="color: #e67e22;"></i>Perusahaan <span class="text-danger">*</span></label><input type="text" name="company" id="formCompany" class="form-control" placeholder="Nama perusahaan" required></div></div></div>
+                    <div class="mb-3"><label class="form-label"><i class="fas fa-map-marker-alt me-1" style="color: #e74c3c;"></i>Alamat <span class="text-danger">*</span></label><textarea name="address" id="formAddress" rows="2" class="form-control" placeholder="Alamat lengkap" required></textarea></div>
+                    <div class="mb-3"><label class="form-label"><i class="fas fa-file-alt me-1" style="color: #f39c12;"></i>Deskripsi <span class="text-danger">*</span></label><textarea name="description" id="formDescription" rows="3" class="form-control" placeholder="Deskripsi lowongan" required></textarea></div>
+                </div>
+                <div class="modal-footer-custom"><button type="button" class="btn btn-light" onclick="hideFormModal()" style="border-radius: 8px;"><i class="fas fa-times me-2"></i>Batal</button><button type="submit" class="btn text-white" style="border-radius: 8px; background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); border: none;"><i class="fas fa-save me-2"></i><span id="formSubmitText">Simpan</span></button></div>
+            </form>
+        </div></div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-backdrop-custom" id="deleteModal" style="display: none;"><div class="modal-custom modal-sm-custom" onclick="event.stopPropagation()"><div class="modal-header-custom bg-danger text-white"><h5 class="modal-title"><i class="fas fa-trash me-2"></i>Hapus Lowongan</h5><button class="close-btn text-white" onclick="hideDeleteModal()"><i class="fas fa-times"></i></button></div><div class="modal-body-custom text-center py-4"><i class="fas fa-exclamation-triangle text-warning" style="font-size: 64px;"></i><h5 class="mt-3">Hapus Lowongan?</h5><p class="text-muted">Anda akan menghapus <strong id="deleteCompanyName"></strong>.</p><p class="text-danger mb-0">Semua data terkait akan dihapus permanen.</p></div><div class="modal-footer-custom justify-content-center"><button class="btn btn-light" onclick="hideDeleteModal()" style="border-radius: 8px;"><i class="fas fa-times me-2"></i>Batal</button><button class="btn btn-danger" onclick="confirmDelete()" style="border-radius: 8px;"><i class="fas fa-trash me-2"></i>Hapus</button></div></div></div>
+
+    <!-- Detail Modal -->
+    <div class="modal-backdrop-custom" id="detailModal" style="display: none;"><div class="modal-custom modal-lg-custom" onclick="event.stopPropagation()"><div class="modal-header-custom text-white" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);"><h5 class="modal-title"><i class="fas fa-briefcase me-2"></i>Detail Lowongan</h5><button class="close-btn text-white" onclick="hideDetailModal()"><i class="fas fa-times"></i></button></div><div class="modal-body-custom" id="detailContent"></div><div class="modal-footer-custom"><button class="btn btn-secondary" onclick="hideDetailModal()" style="border-radius: 8px;"><i class="fas fa-times me-2"></i>Tutup</button></div></div></div>
+
+    <!-- Position Modal -->
+    <div class="modal-backdrop-custom" id="positionModal" style="display: none;"><div class="modal-custom modal-lg-custom" onclick="event.stopPropagation()"><div class="modal-header-custom text-white" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);"><h5 class="modal-title" id="positionModalTitle"><i class="fas fa-list-ol me-2"></i>Kelola Posisi</h5><button class="close-btn text-white" onclick="hidePositionModal()"><i class="fas fa-times"></i></button></div><div class="modal-body-custom">
+            <div class="card bg-light mb-3" style="border-radius: 10px;"><div class="card-body"><h6 class="fw-bold mb-2">Tambah Posisi Baru</h6><div class="row"><div class="col-md-5 mb-2"><input type="text" class="form-control form-control-sm" id="newPositionName" placeholder="Nama posisi" style="border-radius: 8px;"></div><div class="col-md-3 mb-2"><input type="number" class="form-control form-control-sm" id="newPositionCapacity" placeholder="Kapasitas" value="1" min="1" style="border-radius: 8px;"></div><div class="col-md-3 mb-2"><input type="number" class="form-control form-control-sm" id="newPositionApplyCapacity" placeholder="Apply Kapasitas" value="0" min="0" style="border-radius: 8px;"></div><div class="col-md-1"><button class="btn btn-sm btn-success" onclick="handleAddPosition()" style="border-radius: 8px;"><i class="fas fa-plus"></i></button></div></div></div></div>
+            <h6 class="fw-bold" style="font-size: 0.9rem;">Posisi Tersedia</h6><div class="table-responsive"><table class="table table-sm table-bordered"><thead class="bg-light"><tr><th>Posisi</th><th class="text-center">Kapasitas</th><th class="text-center">Apply</th><th class="text-center">Aksi</th></tr></thead><tbody id="positionTableBody"></tbody></table></div>
+        </div><div class="modal-footer-custom"><button class="btn btn-secondary" onclick="hidePositionModal()" style="border-radius: 8px;"><i class="fas fa-times me-2"></i>Tutup</button></div></div></div>
+
+    <!-- Logout Popup -->
+    <div class="modal-backdrop-custom" id="logoutPopup" style="display: none;"><div class="modal-custom modal-sm-custom" onclick="event.stopPropagation()" style="text-align: center; padding: 32px;"><div style="margin-bottom: 20px;"><i class="fas fa-sign-out-alt" style="font-size: 48px; color: #dc3545; background-color: #f8d7da; padding: 16px; border-radius: 50%;"></i></div><h5 style="margin-bottom: 12px; font-weight: bold; color: #333; font-size: 1.25rem;">Konfirmasi Logout</h5><p style="color: #666; margin-bottom: 6px; font-size: 1rem;">Apakah Anda yakin ingin keluar?</p><small style="color: #999; display: block; margin-bottom: 24px; font-size: 0.9rem;">Anda akan diarahkan ke halaman login</small><div style="display: flex; gap: 12px; justify-content: center;"><button class="btn btn-light" onclick="hideLogoutPopup()" style="padding: 10px 24px; font-size: 0.95rem; min-width: 110px;"><i class="fas fa-times me-2"></i>Batal</button><button class="btn btn-danger" onclick="handleLogout()" style="padding: 10px 24px; font-size: 0.95rem; min-width: 110px;"><i class="fas fa-check me-2"></i>Ya, Keluar</button></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==================== HARDCODED DATA ====================
+        let vacancyData = [
+            { id: 1, company: 'PT Teknologi Maju', address: 'Jl. Sudirman No. 123, Jakarta Pusat', description: 'Perusahaan teknologi terkemuka', job_category: { id: 1, job_category: 'IT' }, job_category_id: 1, available_positions: [{ id: 1, position: 'Software Engineer', capacity: 5, apply_capacity: 3 }, { id: 2, position: 'UI/UX Designer', capacity: 3, apply_capacity: 1 }], available_positions_count: 2, job_apply_societies_count: 245, created_at: '2026-01-15T10:30:00' },
+            { id: 2, company: 'PT Inovasi Digital', address: 'Jl. Gatot Subroto No. 45, Surabaya', description: 'Inovasi digital untuk masa depan', job_category: { id: 1, job_category: 'IT' }, job_category_id: 1, available_positions: [{ id: 3, position: 'Data Analyst', capacity: 4, apply_capacity: 2 }, { id: 4, position: 'Project Manager', capacity: 2, apply_capacity: 1 }], available_positions_count: 2, job_apply_societies_count: 198, created_at: '2026-02-20T14:00:00' },
+            { id: 3, company: 'CV Karya Bersama', address: 'Jl. Industri No. 78, Bandung', description: 'Manufaktur berkualitas tinggi', job_category: { id: 2, job_category: 'Manufaktur' }, job_category_id: 2, available_positions: [{ id: 5, position: 'Operator Produksi', capacity: 10, apply_capacity: 5 }], available_positions_count: 1, job_apply_societies_count: 167, created_at: '2026-03-10T09:00:00' },
+            { id: 4, company: 'PT Pariwisata Bali', address: 'Jl. Sunset Road No. 12, Denpasar', description: 'Industri pariwisata terdepan di Bali', job_category: { id: 3, job_category: 'Hospitality' }, job_category_id: 3, available_positions: [{ id: 6, position: 'Marketing', capacity: 3, apply_capacity: 2 }, { id: 7, position: 'Graphic Designer', capacity: 2, apply_capacity: 1 }, { id: 8, position: 'Customer Service', capacity: 5, apply_capacity: 3 }], available_positions_count: 3, job_apply_societies_count: 134, created_at: '2026-04-05T11:00:00' },
+            { id: 5, company: 'PT Solusi Informatika', address: 'Jl. Pemuda No. 56, Jakarta Timur', description: 'Solusi IT untuk bisnis Anda', job_category: { id: 1, job_category: 'IT' }, job_category_id: 1, available_positions: [{ id: 9, position: 'Network Engineer', capacity: 3, apply_capacity: 1 }], available_positions_count: 1, job_apply_societies_count: 112, created_at: '2026-05-01T08:00:00' },
+            { id: 6, company: 'PT Edukasi Nusantara', address: 'Jl. Pendidikan No. 90, Yogyakarta', description: 'Lembaga pendidikan terpercaya', job_category: { id: 4, job_category: 'Pendidikan' }, job_category_id: 4, available_positions: [{ id: 10, position: 'Guru Matematika', capacity: 2, apply_capacity: 1 }, { id: 11, position: 'Guru Bahasa Inggris', capacity: 2, apply_capacity: 0 }], available_positions_count: 2, job_apply_societies_count: 89, created_at: '2026-03-15T13:00:00' }
+        ];
+
+        let nextId = 7;
+        let nextPosId = 12;
+
+        // ==================== STATE ====================
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let selectedVacancyId = null;
+        let isEditMode = false;
+
+        // ==================== HELPERS ====================
+        function formatNumber(n) { return n?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") || "0"; }
+        function formatDate(d) { if (!d) return '-'; return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+        function showBanner(type, msg) { const b = document.getElementById(type + 'Banner'); const t = document.getElementById(type + 'Text'); if (b && t) { t.textContent = msg; b.style.display = 'block'; setTimeout(() => b.style.display = 'none', 5000); } }
+        function hideBanner(id) { document.getElementById(id).style.display = 'none'; }
+
+        function getFilteredData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const cat = document.getElementById('filterCategory').value;
+            return vacancyData.filter(v => {
+                let match = true;
+                if (search) match = match && v.company.toLowerCase().includes(search);
+                if (cat) match = match && v.job_category_id === parseInt(cat);
+                return match;
+            });
+        }
+
+        function renderTable() {
+            const filtered = getFilteredData();
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            const start = (currentPage - 1) * itemsPerPage;
+            const pageData = filtered.slice(start, start + itemsPerPage);
+            const tbody = document.getElementById('tableBody');
+            
+            if (pageData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5"><i class="fas fa-briefcase fa-3x text-muted mb-3 d-block"></i><span style="color: #888;">Belum ada data lowongan</span></td></tr>`;
+            } else {
+                tbody.innerHTML = pageData.map((v, i) => `
+                    <tr>
+                        <td class="ps-4" style="font-size: 0.85rem; color: #888;">${start + i + 1}</td>
+                        <td><div><span style="font-weight: 600; font-size: 0.9rem;"><i class="fas fa-building me-2" style="color: #e67e22;"></i>${v.company}</span></div><small style="color: #888; font-size: 0.78rem;"><i class="fas fa-map-marker-alt me-1"></i>${v.address.substring(0, 40)}${v.address.length > 40 ? '...' : ''}</small></td>
+                        <td><span style="font-size: 0.85rem;"><i class="fas fa-tag me-1" style="color: #9b59b6;"></i>${v.job_category?.job_category || '-'}</span></td>
+                        <td class="text-center"><span class="badge" style="background-color: #e8f0fe; color: #3498db; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">${v.available_positions_count || v.available_positions?.length || 0} Posisi</span></td>
+                        <td class="text-center"><span class="badge" style="background-color: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i class="fas fa-users me-1"></i>${v.job_apply_societies_count || 0}</span></td>
+                        <td style="font-size: 0.85rem; color: #888;">${formatDate(v.created_at)}</td>
+                        <td class="text-center pe-4">
+                            <button class="btn btn-sm btn-info me-1" onclick="handleViewDetail(${v.id})" title="Detail" style="border-radius: 8px; padding: 4px 8px;"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-sm btn-success me-1" onclick="handleManagePositions(${v.id})" title="Kelola Posisi" style="border-radius: 8px; padding: 4px 8px;"><i class="fas fa-list-ol"></i></button>
+                            <button class="btn btn-sm btn-warning me-1" onclick="handleEditClick(${v.id})" title="Edit" style="border-radius: 8px; padding: 4px 8px;"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="handleDeleteClick(${v.id})" title="Hapus" style="border-radius: 8px; padding: 4px 8px;"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            document.getElementById('paginationInfo').textContent = filtered.length > 0 ? `Menampilkan ${start + 1} - ${Math.min(start + itemsPerPage, filtered.length)} dari ${filtered.length} data` : 'Tidak ada data';
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const nav = document.getElementById('paginationNav');
+            if (totalPages <= 1) { nav.innerHTML = ''; return; }
+            let html = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><button class="page-link" onclick="goToPage(1)" style="border-radius: 8px 0 0 8px;"><i class="fas fa-angle-double-left"></i></button></li>`;
+            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><button class="page-link" onclick="goToPage(${currentPage - 1})"><i class="fas fa-angle-left"></i></button></li>`;
+            const pages = getPageNumbers(totalPages);
+            pages.forEach(p => {
+                if (p === '...') html += `<li class="page-item disabled"><button class="page-link">...</button></li>`;
+                else html += `<li class="page-item ${p === currentPage ? 'active' : ''}"><button class="page-link" onclick="goToPage(${p})" style="${p === currentPage ? 'background-color: #e67e22; border-color: #e67e22; color: #fff; font-weight: bold;' : ''}">${p}</button></li>`;
+            });
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><button class="page-link" onclick="goToPage(${currentPage + 1})"><i class="fas fa-angle-right"></i></button></li>`;
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><button class="page-link" onclick="goToPage(${totalPages})" style="border-radius: 0 8px 8px 0;"><i class="fas fa-angle-double-right"></i></button></li>`;
+            nav.innerHTML = html;
+        }
+
+        function getPageNumbers(tp) {
+            const pages = [];
+            if (tp <= 5) { for (let i = 1; i <= tp; i++) pages.push(i); }
+            else { if (currentPage <= 3) { for (let i = 1; i <= 4; i++) pages.push(i); pages.push('...'); pages.push(tp); } else if (currentPage >= tp - 2) { pages.push(1); pages.push('...'); for (let i = tp - 3; i <= tp; i++) pages.push(i); } else { pages.push(1); pages.push('...'); for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i); pages.push('...'); pages.push(tp); } }
+            return pages;
+        }
+
+        function goToPage(p) {
+            const tp = Math.ceil(getFilteredData().length / itemsPerPage);
+            if (p >= 1 && p <= tp) { currentPage = p; renderTable(); }
+        }
+
+        function handleSearch() { currentPage = 1; renderTable(); }
+        function handleResetFilter() { document.getElementById('searchInput').value = ''; document.getElementById('filterCategory').value = ''; currentPage = 1; renderTable(); }
+
+        // ==================== MODALS ====================
+        function showAlertModal(title, msg, icon, color) {
+            document.getElementById('alertTitle').textContent = title; document.getElementById('alertTitle').style.color = color;
+            document.getElementById('alertMessage').textContent = msg; document.getElementById('alertIcon').className = `fas ${icon}`;
+            document.getElementById('alertIcon').style.color = color; document.getElementById('alertModal').style.display = 'flex';
+        }
+        function hideAlertModal() { document.getElementById('alertModal').style.display = 'none'; }
+        document.getElementById('alertModal').addEventListener('click', function(e) { if (e.target === this) hideAlertModal(); });
+
+        // Form Modal
+        function handleCreateClick() { isEditMode = false; selectedVacancyId = null; document.getElementById('formModalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Tambah Lowongan'; document.getElementById('formSubmitText').textContent = 'Simpan'; document.getElementById('vacancyForm').reset(); document.getElementById('formModal').style.display = 'flex'; }
+        function handleEditClick(id) {
+            isEditMode = true; selectedVacancyId = id;
+            const v = vacancyData.find(v => v.id === id); if (!v) return;
+            document.getElementById('formModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Lowongan';
+            document.getElementById('formSubmitText').textContent = 'Perbarui';
+            document.getElementById('formCategory').value = v.job_category_id;
+            document.getElementById('formCompany').value = v.company;
+            document.getElementById('formAddress').value = v.address;
+            document.getElementById('formDescription').value = v.description;
+            document.getElementById('formModal').style.display = 'flex';
+        }
+        function hideFormModal() { document.getElementById('formModal').style.display = 'none'; }
+        document.getElementById('formModal').addEventListener('click', function(e) { if (e.target === this) hideFormModal(); });
+
+        function handleSubmitForm(e) {
+            e.preventDefault();
+            const data = {
+                job_category_id: parseInt(document.getElementById('formCategory').value),
+                company: document.getElementById('formCompany').value,
+                address: document.getElementById('formAddress').value,
+                description: document.getElementById('formDescription').value
+            };
+            
+            if (isEditMode) {
+                const v = vacancyData.find(v => v.id === selectedVacancyId);
+                if (v) {
+                    v.job_category_id = data.job_category_id;
+                    v.company = data.company; v.address = data.address; v.description = data.description;
+                    v.job_category = { id: data.job_category_id, job_category: ['','IT','Manufaktur','Hospitality','Pendidikan'][data.job_category_id] };
+                    showBanner('success', 'Lowongan berhasil diperbarui!');
+                }
+            } else {
+                const catId = data.job_category_id;
+                vacancyData.push({
+                    id: nextId++, company: data.company, address: data.address, description: data.description,
+                    job_category: { id: catId, job_category: ['','IT','Manufaktur','Hospitality','Pendidikan'][catId] },
+                    job_category_id: catId, available_positions: [], available_positions_count: 0,
+                    job_apply_societies_count: 0, created_at: new Date().toISOString()
+                });
+                showBanner('success', 'Lowongan berhasil dibuat!');
+            }
+            hideFormModal(); renderTable();
+        }
+
+        // Delete Modal
+        function handleDeleteClick(id) { selectedVacancyId = id; const v = vacancyData.find(v => v.id === id); if (v) document.getElementById('deleteCompanyName').textContent = v.company; document.getElementById('deleteModal').style.display = 'flex'; }
+        function hideDeleteModal() { document.getElementById('deleteModal').style.display = 'none'; }
+        document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) hideDeleteModal(); });
+        function confirmDelete() {
+            const idx = vacancyData.findIndex(v => v.id === selectedVacancyId);
+            if (idx > -1) { vacancyData.splice(idx, 1); showBanner('success', 'Lowongan berhasil dihapus!'); }
+            hideDeleteModal(); renderTable();
+        }
+
+        // Detail Modal
+        function handleViewDetail(id) {
+            const v = vacancyData.find(v => v.id === id); if (!v) return;
+            const posHTML = v.available_positions?.length > 0 ? v.available_positions.map(p => `<tr><td>${p.position}</td><td class="text-center">${p.capacity}</td><td class="text-center">${p.apply_capacity}</td></tr>`).join('') : '<tr><td colspan="3" class="text-center text-muted py-2">Belum ada posisi</td></tr>';
+            document.getElementById('detailContent').innerHTML = `
+                <div class="card bg-light mb-3" style="border-radius: 10px;"><div class="card-body"><h5 class="fw-bold mb-2">${v.company}</h5><p class="text-muted mb-1"><i class="fas fa-tag me-1"></i>${v.job_category?.job_category || '-'} <span class="mx-2">|</span> <i class="fas fa-map-marker-alt me-1"></i>${v.address}</p><p class="text-muted mb-0"><i class="fas fa-file-alt me-1"></i>${v.description}</p></div></div>
+                <h6 class="fw-bold" style="font-size: 0.9rem;"><i class="fas fa-list-ol text-primary me-2"></i>Posisi (${v.available_positions?.length || 0})</h6>
+                <div class="table-responsive"><table class="table table-sm table-bordered"><thead class="bg-light"><tr><th>Posisi</th><th class="text-center">Kapasitas</th><th class="text-center">Apply</th></tr></thead><tbody>${posHTML}</tbody></table></div>
+            `;
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+        function hideDetailModal() { document.getElementById('detailModal').style.display = 'none'; }
+        document.getElementById('detailModal').addEventListener('click', function(e) { if (e.target === this) hideDetailModal(); });
+
+        // Position Modal
+        function handleManagePositions(id) { selectedVacancyId = id; const v = vacancyData.find(v => v.id === id); if (v) { document.getElementById('positionModalTitle').innerHTML = `<i class="fas fa-list-ol me-2"></i>Kelola Posisi - ${v.company}`; renderPositionTable(); } document.getElementById('positionModal').style.display = 'flex'; }
+        function hidePositionModal() { document.getElementById('positionModal').style.display = 'none'; }
+        document.getElementById('positionModal').addEventListener('click', function(e) { if (e.target === this) hidePositionModal(); });
+
+        function renderPositionTable() {
+            const v = vacancyData.find(v => v.id === selectedVacancyId); if (!v) return;
+            const tbody = document.getElementById('positionTableBody');
+            if (v.available_positions?.length > 0) {
+                tbody.innerHTML = v.available_positions.map(p => `<tr><td>${p.position}</td><td class="text-center">${p.capacity}</td><td class="text-center">${p.apply_capacity}</td><td class="text-center"><button class="btn btn-sm btn-danger" onclick="handleDeletePosition(${p.id})" style="border-radius: 6px; padding: 2px 8px;"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-2">Belum ada posisi</td></tr>';
+            }
+        }
+
+        function handleAddPosition() {
+            const name = document.getElementById('newPositionName').value.trim();
+            if (!name) { showAlertModal('Error', 'Nama posisi wajib diisi', 'fa-exclamation-triangle', '#dc3545'); return; }
+            const v = vacancyData.find(v => v.id === selectedVacancyId); if (!v) return;
+            if (!v.available_positions) v.available_positions = [];
+            v.available_positions.push({
+                id: nextPosId++,
+                position: name,
+                capacity: parseInt(document.getElementById('newPositionCapacity').value) || 1,
+                apply_capacity: parseInt(document.getElementById('newPositionApplyCapacity').value) || 0
+            });
+            v.available_positions_count = v.available_positions.length;
+            document.getElementById('newPositionName').value = '';
+            document.getElementById('newPositionCapacity').value = '1';
+            document.getElementById('newPositionApplyCapacity').value = '0';
+            renderPositionTable();
+            showBanner('success', 'Posisi berhasil ditambahkan!');
+        }
+
+        function handleDeletePosition(posId) {
+            const v = vacancyData.find(v => v.id === selectedVacancyId); if (!v) return;
+            const idx = v.available_positions.findIndex(p => p.id === posId);
+            if (idx > -1) { v.available_positions.splice(idx, 1); v.available_positions_count = v.available_positions.length; renderPositionTable(); showBanner('success', 'Posisi berhasil dihapus!'); }
+        }
+
+        // ==================== SIDEBAR ====================
+        let sidebarCollapsed = false;
+        function toggleSidebar() { sidebarCollapsed = !sidebarCollapsed; updateSidebarState(); }
+        function updateSidebarState() {
+            const s = document.getElementById('sidebar'), m = document.getElementById('mainContent'), h = document.getElementById('fixedHeader');
+            if (sidebarCollapsed) { s.classList.add('collapsed'); m.classList.add('expanded'); h.classList.add('expanded'); document.getElementById('sidebarHeaderExpanded').style.display = 'none'; document.getElementById('sidebarHeaderCollapsed').style.display = 'block'; document.getElementById('sidebarUserProfile').style.display = 'none'; document.getElementById('sidebarFooterExpanded').style.display = 'none'; document.getElementById('sidebarFooterCollapsed').style.display = 'block'; }
+            else { s.classList.remove('collapsed'); m.classList.remove('expanded'); h.classList.remove('expanded'); document.getElementById('sidebarHeaderExpanded').style.display = 'flex'; document.getElementById('sidebarHeaderCollapsed').style.display = 'none'; document.getElementById('sidebarUserProfile').style.display = 'block'; document.getElementById('sidebarFooterExpanded').style.display = 'block'; document.getElementById('sidebarFooterCollapsed').style.display = 'none'; }
+        }
+        function openMobileSidebar() { document.getElementById('sidebar').classList.add('mobile-open'); document.getElementById('sidebarOverlay').classList.add('show'); }
+        function closeMobileSidebar() { document.getElementById('sidebar').classList.remove('mobile-open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+        // ==================== LOGOUT ====================
+        function showLogoutPopup() { document.getElementById('logoutPopup').style.display = 'flex'; }
+        function hideLogoutPopup() { document.getElementById('logoutPopup').style.display = 'none'; }
+        function handleLogout() { localStorage.clear(); window.location.href = '/'; }
+        document.getElementById('logoutPopup').addEventListener('click', function(e) { if (e.target === this) hideLogoutPopup(); });
+
+        // ==================== EVENT LISTENERS ====================
+        function setupEventListeners() {
+            document.getElementById('sidebarToggleBtn').addEventListener('click', toggleSidebar);
+            document.getElementById('sidebarExpandBtn').addEventListener('click', toggleSidebar);
+            document.getElementById('mobileMenuBtn').addEventListener('click', openMobileSidebar);
+            document.getElementById('sidebarOverlay').addEventListener('click', closeMobileSidebar);
+            document.getElementById('logoutBtnSidebar').addEventListener('click', showLogoutPopup);
+            document.getElementById('logoutBtnCollapsed').addEventListener('click', showLogoutPopup);
+            document.querySelectorAll('.nav-link-custom').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link-custom').forEach(l => { l.classList.remove('active'); const c = l.querySelector('.fa-chevron-right'); if (c) c.remove(); });
+                    this.classList.add('active');
+                    if (!sidebarCollapsed) { const ch = document.createElement('i'); ch.className = 'fas fa-chevron-right'; ch.style.fontSize = '12px'; this.appendChild(ch); }
+                    if (window.innerWidth <= 768) closeMobileSidebar();
+                });
+            });
+            window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMobileSidebar(); });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { setupEventListeners(); renderTable(); });
+    </script>
+</body>
+</html>

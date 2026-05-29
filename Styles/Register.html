@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Seekers Platform - Register</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Custom CSS */
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+        
+        .jumbotron {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+        
+        .jumbotron .display-4 {
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .jumbotron .lead {
+            font-weight: 300;
+            opacity: 0.9;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px 25px;
+        }
+        
+        .card-header h4 {
+            font-weight: 500;
+        }
+        
+        .card-body {
+            padding: 30px;
+        }
+        
+        .text-primary {
+            color: #667eea !important;
+        }
+        
+        h5.text-primary {
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-control:disabled {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+        
+        .form-select {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 40px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary .spinner-border {
+            width: 1.2rem;
+            height: 1.2rem;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            animation: slideDown 0.3s ease-out;
+            border: none;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding: 30px 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .jumbotron {
+                padding: 40px 0;
+            }
+            
+            .jumbotron .display-4 {
+                font-size: 2.5rem;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+            
+            .col-md-6:first-child {
+                margin-bottom: 30px;
+            }
+        }
+        
+        /* Nav link styles */
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .nav-link.active {
+            color: white !important;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Job Seekers Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/register">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Jumbotron / Hero Section -->
+        <header class="jumbotron py-4">
+            <div class="container text-center">
+                <h1 class="display-4">Job Seekers Platform</h1>
+                <p class="lead">Create your account and start your journey</p>
+            </div>
+        </header>
+
+        <!-- Register Form -->
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <form id="registerForm" class="card card-default">
+                        <div class="card-header">
+                            <h4 class="mb-0">Register</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Error Message -->
+                            <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none;"></div>
+                            
+                            <!-- Success Message -->
+                            <div id="successMessage" class="alert alert-success" role="alert" style="display: none;"></div>
+                            
+                            <div class="row">
+                                <!-- Left Column - Account Information -->
+                                <div class="col-md-6">
+                                    <h5 class="mb-3 text-primary">Account Information</h5>
+                                    
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input 
+                                            id="email"
+                                            name="email" 
+                                            type="email" 
+                                            class="form-control" 
+                                            placeholder="Enter your email"
+                                            required 
+                                        />
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label for="password">Password</label>
+                                        <input 
+                                            id="password"
+                                            name="password" 
+                                            type="password" 
+                                            class="form-control" 
+                                            placeholder="Min. 6 characters"
+                                            minlength="6"
+                                            required 
+                                        />
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label for="passwordConfirmation">Confirm Password</label>
+                                        <input 
+                                            id="passwordConfirmation"
+                                            name="password_confirmation" 
+                                            type="password" 
+                                            class="form-control" 
+                                            placeholder="Confirm your password"
+                                            minlength="6"
+                                            required 
+                                        />
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label for="idCardNumber">ID Card Number</label>
+                                        <input 
+                                            id="idCardNumber"
+                                            name="id_card_number" 
+                                            type="text" 
+                                            class="form-control" 
+                                            placeholder="8-digit ID card number"
+                                            maxlength="8"
+                                            minlength="8"
+                                            required 
+                                        />
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label for="gender">Gender</label>
+                                        <select 
+                                            id="gender"
+                                            name="gender" 
+                                            class="form-select form-control"
+                                            required
+                                        >
+                                            <option value="">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Column - Personal Information -->
+                                <div class="col-md-6">
+                                    <h5 class="mb-3 text-primary">Personal Information</h5>
+                                    
+                                    <div class="form-group">
+                                        <label for="name">Full Name</label>
+                                        <input 
+                                            id="name"
+                                            name="name" 
+                                            type="text" 
+                                            class="form-control" 
+                                            placeholder="Enter your full name"
+                                            required 
+                                        />
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label for="bornDate">Birth Date</label>
+                                        <input 
+                                            id="bornDate"
+                                            name="born_date" 
+                                            type="date" 
+                                            class="form-control" 
+                                            required 
+                                        />
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label for="regionalId">Regional</label>
+                                        <select 
+                                            id="regionalId"
+                                            name="regional_id" 
+                                            class="form-select form-control"
+                                            required
+                                            disabled
+                                        >
+                                            <option value="">Loading regionals...</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label for="address">Address</label>
+                                        <textarea 
+                                            id="address"
+                                            name="address" 
+                                            class="form-control" 
+                                            placeholder="Enter your complete address"
+                                            rows="3"
+                                            required 
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="text-center">
+                                        <button 
+                                            id="registerButton"
+                                            class="btn btn-primary px-5" 
+                                            type="submit"
+                                            disabled
+                                        >
+                                            Register
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <span>Already have an account? </span>
+                                <a href="/">
+                                    Login here
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="text-center py-4 text-muted">
+                Copyright &copy; 2023 - Web Tech ID
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // API Configuration - Sesuaikan dengan URL API Anda
+        const API_BASE_URL = 'http://localhost:3000/api'; // Ganti dengan URL API Anda
+        
+        // State Management
+        let state = {
+            loading: false,
+            error: '',
+            success: '',
+            regionals: [],
+            loadingRegionals: false,
+            email: '',
+            password: '',
+            passwordConfirmation: '',
+            idCardNumber: '',
+            name: '',
+            bornDate: '',
+            gender: '',
+            address: '',
+            regionalId: ''
+        };
+
+        // DOM Elements
+        const registerForm = document.getElementById('registerForm');
+        const registerButton = document.getElementById('registerButton');
+        const errorMessageDiv = document.getElementById('errorMessage');
+        const successMessageDiv = document.getElementById('successMessage');
+        const regionalSelect = document.getElementById('regionalId');
+        
+        // Input elements
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const passwordConfirmationInput = document.getElementById('passwordConfirmation');
+        const idCardNumberInput = document.getElementById('idCardNumber');
+        const nameInput = document.getElementById('name');
+        const bornDateInput = document.getElementById('bornDate');
+        const genderInput = document.getElementById('gender');
+        const addressInput = document.getElementById('address');
+
+        // API Helper Functions
+        async function apiRequest(method, endpoint, data = null) {
+            const url = API_BASE_URL + endpoint;
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+            
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+            
+            const token = localStorage.getItem('token');
+            if (token) {
+                options.headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch(url, options);
+            const responseData = await response.json();
+            
+            if (!response.ok) {
+                const error = new Error(responseData.message || 'Request failed');
+                error.response = {
+                    status: response.status,
+                    data: responseData
+                };
+                throw error;
+            }
+            
+            return { data: responseData };
+        }
+
+        // UI Helper Functions
+        function showError(message) {
+            state.error = message;
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+            successMessageDiv.style.display = 'none';
+        }
+
+        function hideError() {
+            state.error = '';
+            errorMessageDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            state.success = message;
+            successMessageDiv.textContent = message;
+            successMessageDiv.style.display = 'block';
+            errorMessageDiv.style.display = 'none';
+        }
+
+        function hideSuccess() {
+            state.success = '';
+            successMessageDiv.style.display = 'none';
+        }
+
+        function setLoading(isLoading) {
+            state.loading = isLoading;
+            updateButtonState();
+        }
+
+        function updateButtonState() {
+            registerButton.disabled = state.loading || state.success !== '' || state.loadingRegionals;
+            
+            if (state.loading) {
+                registerButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering...';
+            } else {
+                registerButton.textContent = 'Register';
+            }
+        }
+
+        function navigate(path) {
+            window.location.href = path;
+        }
+
+        // Fetch Regionals
+        async function fetchRegionals() {
+            state.loadingRegionals = true;
+            regionalSelect.disabled = true;
+            updateButtonState();
+            
+            try {
+                const res = await apiRequest('GET', '/auth/get-regional');
+                state.regionals = res.data.data;
+                
+                // Update select options
+                regionalSelect.innerHTML = '<option value="">Select Regional</option>';
+                state.regionals.forEach(regional => {
+                    const option = document.createElement('option');
+                    option.value = regional.id;
+                    option.textContent = `${regional.province} - ${regional.district}`;
+                    regionalSelect.appendChild(option);
+                });
+                
+                regionalSelect.disabled = false;
+            } catch (err) {
+                console.error('Failed to fetch regionals:', err);
+                showError('Failed to load regional data. Please refresh the page.');
+                regionalSelect.innerHTML = '<option value="">Failed to load regionals</option>';
+            } finally {
+                state.loadingRegionals = false;
+                updateButtonState();
+            }
+        }
+
+        // Event Listeners for Input Changes
+        emailInput.addEventListener('input', (e) => {
+            state.email = e.target.value;
+        });
+
+        passwordInput.addEventListener('input', (e) => {
+            state.password = e.target.value;
+        });
+
+        passwordConfirmationInput.addEventListener('input', (e) => {
+            state.passwordConfirmation = e.target.value;
+        });
+
+        idCardNumberInput.addEventListener('input', (e) => {
+            // Only allow numbers
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            state.idCardNumber = e.target.value;
+        });
+
+        nameInput.addEventListener('input', (e) => {
+            state.name = e.target.value;
+        });
+
+        bornDateInput.addEventListener('input', (e) => {
+            state.bornDate = e.target.value;
+        });
+
+        genderInput.addEventListener('change', (e) => {
+            state.gender = e.target.value;
+        });
+
+        regionalSelect.addEventListener('change', (e) => {
+            state.regionalId = e.target.value;
+        });
+
+        addressInput.addEventListener('input', (e) => {
+            state.address = e.target.value;
+        });
+
+        // Form Submission
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Update state from form
+            state.email = emailInput.value;
+            state.password = passwordInput.value;
+            state.passwordConfirmation = passwordConfirmationInput.value;
+            state.idCardNumber = idCardNumberInput.value;
+            state.name = nameInput.value;
+            state.bornDate = bornDateInput.value;
+            state.gender = genderInput.value;
+            state.address = addressInput.value;
+            state.regionalId = regionalSelect.value;
+            
+            // Validate password confirmation
+            if (state.password !== state.passwordConfirmation) {
+                showError('Password and password confirmation do not match.');
+                return;
+            }
+            
+            setLoading(true);
+            hideError();
+            hideSuccess();
+
+            try {
+                const res = await apiRequest('POST', '/auth/register', {
+                    email: state.email,
+                    password: state.password,
+                    id_card_number: state.idCardNumber,
+                    name: state.name,
+                    born_date: state.bornDate,
+                    gender: state.gender,
+                    address: state.address,
+                    regional_id: state.regionalId
+                });
+
+                // Show success message
+                showSuccess('Registration successful! Redirecting to dashboard...');
+
+                // Save token and user data
+                const token = res.data.data.token;
+                const userData = res.data.data.user;
+                const profileData = res.data.data.profile;
+
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(userData));
+                localStorage.setItem('profile', JSON.stringify(profileData));
+
+                // Redirect to dashboard after 1.5 seconds
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 1500);
+
+            } catch (err) {
+                if (err.response && err.response.data) {
+                    // Handle validation errors
+                    if (err.response.data.errors) {
+                        const errorMessages = Object.values(err.response.data.errors).flat().join('\n');
+                        showError(errorMessages);
+                    } else if (err.response.data.message) {
+                        showError(err.response.data.message);
+                    } else {
+                        showError('Registration failed. Please try again.');
+                    }
+                } else {
+                    showError('Network error. Please check your connection.');
+                }
+                console.error('Registration error:', err);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Initialize - Load regionals on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRegionals();
+        });
+
+        // For demo purposes - jika API tidak tersedia
+        // Uncomment kode di bawah ini untuk testing tanpa backend
+        /*
+        async function fetchRegionals() {
+            state.loadingRegionals = true;
+            regionalSelect.disabled = true;
+            updateButtonState();
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Demo regionals data
+            const demoRegionals = [
+                { id: 1, province: 'DKI Jakarta', district: 'Jakarta Pusat' },
+                { id: 2, province: 'DKI Jakarta', district: 'Jakarta Selatan' },
+                { id: 3, province: 'Jawa Barat', district: 'Bandung' },
+                { id: 4, province: 'Jawa Timur', district: 'Surabaya' },
+                { id: 5, province: 'Bali', district: 'Denpasar' }
+            ];
+            
+            state.regionals = demoRegionals;
+            
+            // Update select options
+            regionalSelect.innerHTML = '<option value="">Select Regional</option>';
+            state.regionals.forEach(regional => {
+                const option = document.createElement('option');
+                option.value = regional.id;
+                option.textContent = `${regional.province} - ${regional.district}`;
+                regionalSelect.appendChild(option);
+            });
+            
+            regionalSelect.disabled = false;
+            state.loadingRegionals = false;
+            updateButtonState();
+        }
+
+        // Demo register form submission
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Update state from form
+            state.email = emailInput.value;
+            state.password = passwordInput.value;
+            state.passwordConfirmation = passwordConfirmationInput.value;
+            state.idCardNumber = idCardNumberInput.value;
+            state.name = nameInput.value;
+            state.bornDate = bornDateInput.value;
+            state.gender = genderInput.value;
+            state.address = addressInput.value;
+            state.regionalId = regionalSelect.value;
+            
+            // Validate
+            if (state.password !== state.passwordConfirmation) {
+                showError('Password and password confirmation do not match.');
+                return;
+            }
+            
+            setLoading(true);
+            hideError();
+            hideSuccess();
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Demo success
+            showSuccess('Registration successful! Redirecting to dashboard...');
+            
+            const demoData = {
+                token: 'demo-token-register-123',
+                user: {
+                    id: 1,
+                    name: state.name,
+                    email: state.email,
+                    role: 'society'
+                },
+                profile: {
+                    full_name: state.name,
+                    id_card_number: state.idCardNumber,
+                    born_date: state.bornDate,
+                    gender: state.gender,
+                    address: state.address,
+                    regional_id: state.regionalId
+                }
+            };
+            
+            localStorage.setItem('token', demoData.token);
+            localStorage.setItem('user', JSON.stringify(demoData.user));
+            localStorage.setItem('profile', JSON.stringify(demoData.profile));
+            
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 1500);
+            
+            setLoading(false);
+        });
+        */
+    </script>
+</body>
+</html>

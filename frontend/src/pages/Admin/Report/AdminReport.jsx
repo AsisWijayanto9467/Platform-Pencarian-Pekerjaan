@@ -51,9 +51,12 @@ export default function AdminReport() {
         }
     };
 
+    
     const handleGenerateReport = async () => {
         setGeneratingReport(true);
         setError("");
+        setReportData(null);
+        
         try {
             const params = {
                 type: reportType,
@@ -62,10 +65,32 @@ export default function AdminReport() {
             if (reportDateFrom) params.date_from = reportDateFrom;
             if (reportDateTo) params.date_to = reportDateTo;
             
-            const res = await api.get("/admin/reports", { params });
-            setReportData(res.data.data);
-            showSuccessBanner('Laporan berhasil digenerate!');
+            // Jika format PDF, gunakan responseType blob
+            if (reportFormat === 'pdf') {
+                const res = await api.get("/admin/reports", { 
+                    params,
+                    responseType: 'blob'  // PENTING: untuk download file
+                });
+                
+                // Buat download PDF
+                const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `laporan-${reportType}-${new Date().toISOString().split('T')[0]}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                showSuccessBanner('Laporan PDF berhasil didownload!');
+            } else {
+                // Format JSON
+                const res = await api.get("/admin/reports", { params });
+                setReportData(res.data.data);
+                showSuccessBanner('Laporan berhasil digenerate!');
+            }
         } catch (err) {
+            console.error('Generate report error:', err);
             setError(err.response?.data?.message || 'Gagal generate laporan');
         } finally {
             setGeneratingReport(false);
@@ -75,6 +100,8 @@ export default function AdminReport() {
     const handleExportData = async () => {
         setExporting(true);
         setError("");
+        setExportData(null);
+        
         try {
             const params = {
                 type: exportType,
@@ -83,26 +110,49 @@ export default function AdminReport() {
             if (exportDateFrom) params.date_from = exportDateFrom;
             if (exportDateTo) params.date_to = exportDateTo;
             
-            const res = await api.get("/admin/export", { 
+            // Tentukan responseType berdasarkan format
+            const config = {
                 params,
-                responseType: exportFormat === 'csv' ? 'blob' : 'json'
-            });
+                responseType: exportFormat === 'json' ? 'json' : 'blob'  // blob untuk csv dan pdf
+            };
+            
+            const res = await api.get("/admin/export", config);
             
             if (exportFormat === 'csv') {
-                // Download CSV file
-                const url = window.URL.createObjectURL(new Blob([res.data]));
+                // Download CSV
+                const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', `${exportType}-export.csv`);
+                link.setAttribute('download', `${exportType}-export-${new Date().toISOString().split('T')[0]}.csv`);
                 document.body.appendChild(link);
                 link.click();
-                link.remove();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
                 showSuccessBanner('Data berhasil diexport ke CSV!');
+                
+            } else if (exportFormat === 'pdf') {
+                // Download PDF
+                const blob = new Blob([res.data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `${exportType}-export-${new Date().toISOString().split('T')[0]}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                showSuccessBanner('Data berhasil diexport ke PDF!');
+                
             } else {
+                // Format JSON
                 setExportData(res.data);
                 showSuccessBanner('Data berhasil diexport!');
             }
         } catch (err) {
+            console.error('Export error:', err);
             setError(err.response?.data?.message || 'Gagal export data');
         } finally {
             setExporting(false);

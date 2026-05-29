@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPortal - Validasi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background-color:#f5f5f5;overflow-x:hidden}
+        .navbar-dark .navbar-nav .nav-link{color:rgba(255,255,255,0.85)}
+        .navbar-dark .navbar-nav .nav-link:hover{color:#fff;background-color:rgba(255,255,255,0.1)}
+        .navbar-dark .navbar-nav .nav-link.active{background-color:rgba(255,255,255,0.25)!important;color:#fff!important}
+        .dropdown-item{font-size:0.9rem;cursor:pointer;transition:all 0.15s ease}
+        .dropdown-item:hover{background-color:#f8f9fa}
+        .dropdown-menu.show{display:block}
+        .modal-backdrop-custom{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px}
+        .modal-custom{background:white;border-radius:10px;width:420px;max-width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;padding:32px}
+        @media(max-width:991px){.navbar-collapse{background-color:#2c3e50;border-radius:0 0 12px 12px;padding:12px;margin-top:8px;box-shadow:0 8px 20px rgba(0,0,0,0.2)}.navbar-nav{gap:4px}.navbar-nav .nav-link{border-radius:8px!important;padding:10px 16px!important}.dropdown-menu.show{position:static!important;background-color:#34495e;border:1px solid rgba(255,255,255,0.1)}.dropdown-menu .dropdown-item{color:#fff}.dropdown-menu .dropdown-item:hover{background-color:rgba(255,255,255,0.1);color:#fff}}
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+                <div class="bg-white rounded d-flex align-items-center justify-content-center me-2" style="width:32px;height:32px"><i class="fas fa-briefcase text-primary" style="font-size:16px"></i></div>
+                <span style="font-weight:700;font-size:1.2rem">JobPortal</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" onclick="toggleMobileMenu()" style="padding:4px 8px"><i class="fas fa-bars text-white" id="mobileMenuIcon" style="font-size:20px"></i></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto" id="navbarLinks">
+                    <li class="nav-item"><a href="/dashboard" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-tachometer-alt me-2" style="font-size:14px"></i>Dashboard</a></li>
+                    <li class="nav-item"><a href="/profile" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-user-circle me-2" style="font-size:14px"></i>Profil Saya</a></li>
+                    <li class="nav-item"><a href="/validation" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded active" style="font-size:0.9rem;font-weight:600;background-color:rgba(255,255,255,0.25)"><i class="fas fa-clipboard-check me-2" style="font-size:14px"></i>Validasi</a></li>
+                    <li class="nav-item"><a href="/job-vacancies" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-briefcase me-2" style="font-size:14px"></i>Lowongan</a></li>
+                    <li class="nav-item"><a href="/application" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-file-alt me-2" style="font-size:14px"></i>Lamaran</a></li>
+                    <li class="nav-item"><a href="/history" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-history me-2" style="font-size:14px"></i>Riwayat</a></li>
+                </ul>
+                <div class="d-flex align-items-center ms-lg-3 mt-2 mt-lg-0">
+                    <a href="/notifications" class="btn btn-link text-white position-relative me-2" style="text-decoration:none;padding:8px 10px"><i class="fas fa-bell" style="font-size:18px"></i><span class="badge bg-danger position-absolute" style="top:2px;right:2px;font-size:10px;padding:3px 5px;line-height:1">3</span></a>
+                    <div class="position-relative" id="userDropdownContainer">
+                        <button class="btn btn-link text-white d-flex align-items-center" onclick="toggleUserDropdown()" style="text-decoration:none;padding:8px 10px">
+                            <div class="rounded-circle bg-white d-flex align-items-center justify-content-center me-2" style="width:30px;height:30px"><span class="text-primary fw-bold" style="font-size:14px">B</span></div>
+                            <span class="d-none d-md-inline text-white" style="font-size:0.9rem">Budi Santoso</span>
+                            <i class="fas fa-chevron-down ms-2" id="userDropdownIcon" style="font-size:10px"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow border-0" id="userDropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:8px;border-radius:8px;min-width:220px;z-index:1000">
+                            <div class="px-3 py-2 border-bottom"><p class="mb-0 fw-bold" style="font-size:0.9rem">Budi Santoso</p><small class="text-muted" style="font-size:0.8rem">budi@email.com</small></div>
+                            <a class="dropdown-item py-2" href="/profile"><i class="fas fa-user-circle me-2 text-primary"></i>Profil Saya</a>
+                            <a class="dropdown-item py-2" href="/validation"><i class="fas fa-clipboard-check me-2 text-success"></i>Status Validasi</a>
+                            <a class="dropdown-item py-2" href="/bookmarks"><i class="fas fa-bookmark me-2 text-warning"></i>Bookmark</a>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item py-2 text-danger" onclick="showLogoutPopup()"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1" style="background-color:#f5f5f5;padding-top:76px;padding-bottom:24px">
+        <div class="container">
+            <!-- Success/Error Banners -->
+            <div id="successBanner" class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius:10px;display:none"><i class="fas fa-check-circle me-2"></i><strong>Berhasil!</strong> <span id="successText"></span><button type="button" class="btn-close" onclick="document.getElementById('successBanner').style.display='none'"></button></div>
+            <div id="errorBanner" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius:10px;display:none"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorText"></span><button type="button" class="btn-close" onclick="document.getElementById('errorBanner').style.display='none'"></button></div>
+
+            <!-- Status Card -->
+            <div class="row mb-4"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px"><div class="card-body p-4" id="statusCardContent"></div></div></div></div>
+
+            <!-- Main Content Area -->
+            <div id="mainContentArea"></div>
+
+            <!-- Info Card -->
+            <div class="row mt-4"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px"><div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius:12px 12px 0 0"><h6 class="mb-0 fw-bold" style="color:#2c3e50;font-size:1rem"><i class="fas fa-info-circle text-info me-2"></i>Informasi Validasi</h6></div><div class="card-body"><div class="row"><div class="col-md-4 mb-3"><div class="d-flex align-items-center"><div class="me-3" style="width:40px;height:40px;border-radius:10px;background-color:#fff3cd;display:flex;align-items:center;justify-content:center"><i class="fas fa-clock text-warning"></i></div><div><p class="mb-0" style="font-size:0.9rem;font-weight:600">Status Pending</p><small style="color:#888">Menunggu diverifikasi oleh validator</small></div></div></div><div class="col-md-4 mb-3"><div class="d-flex align-items-center"><div class="me-3" style="width:40px;height:40px;border-radius:10px;background-color:#d4edda;display:flex;align-items:center;justify-content:center"><i class="fas fa-check-circle text-success"></i></div><div><p class="mb-0" style="font-size:0.9rem;font-weight:600">Tervalidasi</p><small style="color:#888">Anda bisa melamar pekerjaan</small></div></div></div><div class="col-md-4 mb-3"><div class="d-flex align-items-center"><div class="me-3" style="width:40px;height:40px;border-radius:10px;background-color:#f8d7da;display:flex;align-items:center;justify-content:center"><i class="fas fa-times-circle text-danger"></i></div><div><p class="mb-0" style="font-size:0.9rem;font-weight:600">Ditolak</p><small style="color:#888">Ajukan validasi baru jika perlu</small></div></div></div></div></div></div></div></div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-top mt-auto"><div class="container"><div class="d-flex justify-content-between align-items-center py-3"><small class="text-muted" style="font-size:0.85rem">&copy; 2026 JobPortal - Sistem Pencari Kerja</small><small class="text-muted" style="font-size:0.85rem"><i class="fas fa-shield-alt me-1"></i>Sistem Terproteksi</small></div></div></footer>
+
+    <!-- Delete Modal -->
+    <div class="modal-backdrop-custom" id="deleteModal" style="display:none"><div class="modal-custom" onclick="event.stopPropagation()"><div style="margin-bottom:20px"><i class="fas fa-exclamation-triangle" style="font-size:48px;color:#dc3545;background-color:#f8d7da;padding:16px;border-radius:50%"></i></div><h5 style="margin-bottom:12px;font-weight:bold;color:#333">Batalkan Validasi?</h5><p style="color:#666;margin-bottom:24px">Validasi yang dibatalkan akan dihapus permanen.</p><div style="display:flex;gap:12px;justify-content:center"><button onclick="hideDeleteModal()" class="btn btn-light" style="padding:10px 24px;border-radius:8px"><i class="fas fa-times me-2"></i>Batal</button><button onclick="handleCancelValidation()" class="btn btn-danger" style="padding:10px 24px;border-radius:8px"><i class="fas fa-trash me-2"></i>Ya, Batalkan</button></div></div></div>
+
+    <!-- Logout Popup -->
+    <div class="modal-backdrop-custom" id="logoutPopup" style="display:none"><div class="modal-custom" onclick="event.stopPropagation()"><div style="margin-bottom:20px"><i class="fas fa-sign-out-alt" style="font-size:48px;color:#dc3545;background-color:#f8d7da;padding:16px;border-radius:50%"></i></div><h5 style="margin-bottom:12px;font-weight:bold;color:#333;font-size:1.25rem">Konfirmasi Logout</h5><p style="color:#666;margin-bottom:6px;font-size:1rem">Apakah Anda yakin ingin keluar?</p><small style="color:#999;display:block;margin-bottom:24px;font-size:0.9rem">Anda akan diarahkan ke halaman login</small><div style="display:flex;gap:12px;justify-content:center"><button class="btn btn-light" onclick="hideLogoutPopup()" style="padding:10px 24px;font-size:0.95rem;min-width:110px;border-radius:8px"><i class="fas fa-times me-2"></i>Batal</button><button class="btn btn-danger" onclick="handleLogout()" style="padding:10px 24px;font-size:0.95rem;min-width:110px;border-radius:8px"><i class="fas fa-check me-2"></i>Ya, Keluar</button></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==================== HARDCODED DATA ====================
+        // Change this to 'pending', 'accepted', 'declined', or null to see different states
+        const validationData = {
+            id: 1,
+            status: 'pending', // 'pending' | 'accepted' | 'declined' | null (no validation)
+            job_category: { id: 1, job_category: 'IT' },
+            job_position: 'Software Engineer',
+            work_experience: '5 tahun pengalaman sebagai Web Developer di perusahaan multinasional. Menguasai React, Node.js, dan database management.',
+            reason_accepted: 'Memiliki pengalaman yang relevan dan kemampuan teknis yang sesuai dengan kebutuhan perusahaan.',
+            validator: { name: 'Dr. Ahmad Fauzi' },
+            validator_notes: 'Dokumen validasi lengkap dan sesuai dengan kriteria.',
+            created_at: '2026-05-20T10:30:00',
+            updated_at: '2026-05-25T14:00:00'
+        };
+
+        const categoriesData = [
+            { id: 1, job_category: 'IT' },
+            { id: 2, job_category: 'Desain' },
+            { id: 3, job_category: 'Manajemen' },
+            { id: 4, job_category: 'Hospitality' },
+            { id: 5, job_category: 'Pendidikan' }
+        ];
+
+        let mode = 'view'; // 'view' | 'submit' | 'edit'
+        let formData = {
+            work_experience: '',
+            job_category_id: '',
+            job_position: '',
+            reason_accepted: ''
+        };
+
+        function showBanner(t,m){document.getElementById(t+'Banner').style.display='block';document.getElementById(t+'Text').textContent=m;setTimeout(()=>document.getElementById(t+'Banner').style.display='none',5000)}
+        function formatDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+
+        function getStatusBadge(s){
+            switch(s){
+                case'accepted':return{icon:'fa-check-circle',color:'#155724',bg:'#d4edda',label:'Tervalidasi'};
+                case'declined':return{icon:'fa-times-circle',color:'#721c24',bg:'#f8d7da',label:'Ditolak'};
+                case'pending':return{icon:'fa-clock',color:'#856404',bg:'#fff3cd',label:'Menunggu Validasi'};
+                default:return{icon:'fa-question-circle',color:'#6c757d',bg:'#e9ecef',label:'Belum Validasi'};
+            }
+        }
+
+        function renderAll(){
+            renderStatusCard();
+            renderMainContent();
+        }
+
+        function renderStatusCard(){
+            const hasValidation = validationData !== null;
+            const isPending = validationData?.status === 'pending';
+            const status = getStatusBadge(validationData?.status);
+            const container = document.getElementById('statusCardContent');
+
+            let actionButtons = '';
+            if (!hasValidation && mode === 'view') {
+                actionButtons = `<button class="btn btn-success" onclick="handleStartSubmit()" style="border-radius:10px"><i class="fas fa-plus-circle me-2"></i>Ajukan Validasi</button>`;
+            } else if (isPending && mode === 'view') {
+                actionButtons = `<button class="btn btn-warning me-2" onclick="handleStartEdit()" style="border-radius:10px"><i class="fas fa-edit me-2"></i>Edit Validasi</button><button class="btn btn-danger" onclick="showDeleteModal()" style="border-radius:10px"><i class="fas fa-trash me-2"></i>Batalkan</button>`;
+            }
+
+            container.innerHTML = `
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center justify-content-center me-3" style="width:60px;height:60px;border-radius:14px;background-color:${hasValidation?status.bg:'#f8d7da'}">
+                            <i class="fas ${status.icon}" style="font-size:26px;color:${hasValidation?status.color:'#dc3545'}"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold" style="color:#2c3e50;font-size:1.1rem">Status Validasi</h6>
+                            <span class="badge" style="background-color:${status.bg};color:${status.color};padding:8px 16px;border-radius:20px;font-size:0.9rem;font-weight:600;border:2px solid ${status.color}"><i class="fas ${status.icon} me-1"></i>${status.label}</span>
+                        </div>
+                    </div>
+                    <div>${actionButtons}</div>
+                </div>`;
+        }
+
+        function renderMainContent(){
+            const container = document.getElementById('mainContentArea');
+            const hasValidation = validationData !== null;
+
+            if (mode === 'submit' || mode === 'edit') {
+                container.innerHTML = `
+                    <div class="row"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px">
+                        <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius:12px 12px 0 0"><h6 class="mb-0 fw-bold" style="color:#2c3e50;font-size:1rem"><i class="fas fa-${mode==='submit'?'plus-circle':'edit'} text-primary me-2"></i>${mode==='submit'?'Form Pengajuan Validasi':'Edit Validasi'}</h6></div>
+                        <div class="card-body">
+                            <form onsubmit="handleSubmitForm(event)">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3"><label class="form-label"><i class="fas fa-tag me-1" style="color:#9b59b6"></i>Kategori Pekerjaan <span class="text-danger">*</span></label><select name="job_category_id" id="formCategory" class="form-select" style="border-radius:8px"><option value="">-- Pilih Kategori --</option>${categoriesData.map(c=>`<option value="${c.id}">${c.job_category}</option>`).join('')}</select></div>
+                                    <div class="col-md-6 mb-3"><label class="form-label"><i class="fas fa-briefcase me-1" style="color:#e67e22"></i>Posisi Pekerjaan <span class="text-danger">*</span></label><input type="text" name="job_position" id="formPosition" class="form-control" placeholder="Contoh: Web Developer" style="border-radius:8px"></div>
+                                </div>
+                                <div class="mb-3"><label class="form-label"><i class="fas fa-history me-1" style="color:#3498db"></i>Pengalaman Kerja <span class="text-danger">*</span></label><textarea name="work_experience" id="formExperience" rows="3" class="form-control" placeholder="Jelaskan pengalaman kerja Anda..." style="border-radius:8px"></textarea></div>
+                                <div class="mb-3"><label class="form-label"><i class="fas fa-check-circle me-1" style="color:#2ecc71"></i>Alasan Diterima <span class="text-danger">*</span></label><textarea name="reason_accepted" id="formReason" rows="3" class="form-control" placeholder="Jelaskan mengapa Anda cocok untuk posisi ini..." style="border-radius:8px"></textarea></div>
+                                <div class="text-end"><button type="button" class="btn btn-light me-2" onclick="handleCancelForm()" style="border-radius:8px"><i class="fas fa-times me-2"></i>Batal</button><button type="submit" class="btn text-white" style="border-radius:8px;background:linear-gradient(135deg,#3498db 0%,#2980b9 100%);border:none"><i class="fas fa-save me-2"></i>${mode==='submit'?'Ajukan Validasi':'Simpan Perubahan'}</button></div>
+                            </form>
+                        </div>
+                    </div></div></div>`;
+                // Pre-fill form for edit mode
+                if (mode === 'edit' && validationData) {
+                    document.getElementById('formCategory').value = validationData.job_category?.id || '';
+                    document.getElementById('formPosition').value = validationData.job_position || '';
+                    document.getElementById('formExperience').value = validationData.work_experience || '';
+                    document.getElementById('formReason').value = validationData.reason_accepted || '';
+                }
+            } else if (hasValidation) {
+                const v = validationData;
+                container.innerHTML = `
+                    <div class="row"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px">
+                        <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius:12px 12px 0 0"><h6 class="mb-0 fw-bold" style="color:#2c3e50;font-size:1rem"><i class="fas fa-info-circle text-primary me-2"></i>Detail Validasi</h6></div>
+                        <div class="card-body">
+                            <div class="row"><div class="col-md-6 mb-3"><label style="color:#888;font-size:0.8rem"><i class="fas fa-tag me-1"></i>Kategori Pekerjaan</label><p style="font-size:0.95rem;font-weight:600">${v.job_category?.job_category||'-'}</p></div><div class="col-md-6 mb-3"><label style="color:#888;font-size:0.8rem"><i class="fas fa-briefcase me-1"></i>Posisi Pekerjaan</label><p style="font-size:0.95rem;font-weight:600">${v.job_position||'-'}</p></div></div>
+                            <div class="row"><div class="col-12 mb-3"><label style="color:#888;font-size:0.8rem"><i class="fas fa-history me-1"></i>Pengalaman Kerja</label><p style="font-size:0.95rem">${v.work_experience||'-'}</p></div></div>
+                            <div class="row"><div class="col-12 mb-3"><label style="color:#888;font-size:0.8rem"><i class="fas fa-check-circle me-1"></i>Alasan Diterima</label><p style="font-size:0.95rem">${v.reason_accepted||'-'}</p></div></div>
+                            ${v.validator?`<div class="row"><div class="col-md-6 mb-3"><label style="color:#888;font-size:0.8rem"><i class="fas fa-user-check me-1"></i>Validator</label><p style="font-size:0.95rem;font-weight:600">${v.validator.name}</p></div>${v.validator_notes?`<div class="col-md-6 mb-3"><label style="color:#888;font-size:0.8rem"><i class="fas fa-sticky-note me-1"></i>Catatan Validator</label><p style="font-size:0.9rem;font-style:italic">"${v.validator_notes}"</p></div>`:''}</div>`:''}
+                            <hr><div class="row"><div class="col-md-6"><small class="text-muted">Diajukan: ${formatDate(v.created_at)}</small></div><div class="col-md-6 text-end"><small class="text-muted">Terakhir Diperbarui: ${formatDate(v.updated_at)}</small></div></div>
+                        </div>
+                    </div></div></div>`;
+            } else {
+                container.innerHTML = `
+                    <div class="row"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px"><div class="card-body text-center py-5">
+                        <i class="fas fa-clipboard-check fa-4x text-muted mb-3 d-block"></i><h5 class="text-muted">Belum Ada Validasi</h5><p class="text-muted mb-3">Anda belum mengajukan validasi. Validasi diperlukan untuk melamar pekerjaan.</p>
+                        <button class="btn btn-success" onclick="handleStartSubmit()" style="border-radius:10px"><i class="fas fa-plus-circle me-2"></i>Ajukan Validasi Sekarang</button>
+                    </div></div></div></div>`;
+            }
+        }
+
+        function handleStartSubmit(){
+            mode='submit';formData={work_experience:'',job_category_id:'',job_position:'',reason_accepted:''};
+            renderAll();
+        }
+        function handleStartEdit(){
+            mode='edit';
+            if(validationData){formData={work_experience:validationData.work_experience||'',job_category_id:validationData.job_category?.id||'',job_position:validationData.job_position||'',reason_accepted:validationData.reason_accepted||''}}
+            renderAll();
+        }
+        function handleCancelForm(){mode='view';renderAll()}
+
+        function handleSubmitForm(e){
+            e.preventDefault();
+            const data={
+                work_experience:document.getElementById('formExperience').value,
+                job_category_id:document.getElementById('formCategory').value,
+                job_position:document.getElementById('formPosition').value,
+                reason_accepted:document.getElementById('formReason').value
+            };
+            if(!data.job_category_id||!data.job_position.trim()||!data.work_experience.trim()||!data.reason_accepted.trim()){
+                showBanner('error','Semua field wajib diisi');return;
+            }
+            // Update hardcoded data
+            validationData.work_experience=data.work_experience;
+            validationData.job_category=categoriesData.find(c=>c.id==data.job_category_id)||validationData.job_category;
+            validationData.job_position=data.job_position;
+            validationData.reason_accepted=data.reason_accepted;
+            if(mode==='submit'){validationData.status='pending';validationData.created_at=new Date().toISOString();validationData.updated_at=new Date().toISOString()}
+            else{validationData.updated_at=new Date().toISOString()}
+            mode='view';
+            showBanner('success',mode==='submit'?'Validasi berhasil diajukan!':'Validasi berhasil diperbarui!');
+            renderAll();
+        }
+
+        function showDeleteModal(){document.getElementById('deleteModal').style.display='flex'}
+        function hideDeleteModal(){document.getElementById('deleteModal').style.display='none'}
+        document.getElementById('deleteModal').addEventListener('click',function(e){if(e.target===this)hideDeleteModal()});
+        function handleCancelValidation(){validationData.status=null;validationData.validator=null;validationData.validator_notes=null;hideDeleteModal();mode='view';showBanner('success','Validasi berhasil dibatalkan!');renderAll()}
+
+        // ==================== MOBILE MENU ====================
+        let mobileMenuOpen=false;
+        function toggleMobileMenu(){mobileMenuOpen=!mobileMenuOpen;document.getElementById('navbarNav').classList.toggle('show',mobileMenuOpen);document.getElementById('mobileMenuIcon').className=`fas fa-${mobileMenuOpen?'times':'bars'} text-white`}
+
+        // ==================== USER DROPDOWN ====================
+        function toggleUserDropdown(){const dd=document.getElementById('userDropdown'),icon=document.getElementById('userDropdownIcon'),isOpen=dd.style.display==='block';dd.style.display=isOpen?'none':'block';icon.className=`fas fa-chevron-${isOpen?'down':'up'} ms-2`}
+        document.addEventListener('click',function(e){const c=document.getElementById('userDropdownContainer');if(c&&!c.contains(e.target)){document.getElementById('userDropdown').style.display='none';document.getElementById('userDropdownIcon').className='fas fa-chevron-down ms-2'}});
+
+        // ==================== LOGOUT ====================
+        function showLogoutPopup(){document.getElementById('logoutPopup').style.display='flex'}
+        function hideLogoutPopup(){document.getElementById('logoutPopup').style.display='none'}
+        function handleLogout(){localStorage.clear();window.location.href='/'}
+        document.getElementById('logoutPopup').addEventListener('click',function(e){if(e.target===this)hideLogoutPopup()});
+
+        // ==================== NAVIGATION ====================
+        document.querySelectorAll('#navbarLinks .nav-link').forEach(link=>{link.addEventListener('click',function(e){e.preventDefault();document.querySelectorAll('#navbarLinks .nav-link').forEach(l=>{l.classList.remove('active');l.style.fontWeight='400';l.style.backgroundColor='transparent'});this.classList.add('active');this.style.fontWeight='600';this.style.backgroundColor='rgba(255,255,255,0.25)'})});
+
+        // Initialize
+        renderAll();
+    </script>
+</body>
+</html>

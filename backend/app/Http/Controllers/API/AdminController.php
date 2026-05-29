@@ -1224,9 +1224,8 @@ class AdminController extends Controller
             'format' => 'nullable|in:json,pdf',
         ]);
 
-        // Tentukan periode berdasarkan type
         $dateFrom = $request->date_from ? Carbon::parse($request->date_from) : $this->getDefaultDateFrom($request->type);
-        $dateTo = $request->date_to ? Carbon::parse($request->date_to) : Carbon::now();
+        $dateTo = $request->date_to ? Carbon::parse($request->date_to)->endOfDay() : Carbon::now()->endOfDay();
 
         $report = [
             'report_type' => $request->type,
@@ -1265,13 +1264,35 @@ class AdminController extends Controller
                     ->select('id', 'name', 'id_card_number', 'gender', 'created_at')
                     ->with('regional:id,province,district')
                     ->latest()
-                    ->get(),
+                    ->get()
+                    ->makeHidden(['photo', 'login_tokens']) // Sembunyikan data sensitif
             ]
         ];
 
         // Jika request format PDF
         if ($request->format === 'pdf') {
-            return $this->generatePDFReport($report);
+            try {
+                $pdf = Pdf::loadView('pdf.admin-report', [
+                    'report' => $report,
+                    'title' => 'Laporan ' . ucfirst($request->type)
+                ]);
+
+                $pdf->setPaper('A4', 'portrait');
+                $pdf->setOptions([
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => false,
+                    'defaultFont' => 'sans-serif',
+                ]);
+
+                $filename = 'Laporan-' . ucfirst($request->type) . '-' . date('Y-m-d') . '.pdf';
+
+                return $pdf->download($filename);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Gagal generate PDF: ' . $e->getMessage()
+                ], 500);
+            }
         }
 
         // Default return JSON
@@ -1296,7 +1317,7 @@ class AdminController extends Controller
         }
 
         $dateFrom = $request->date_from ? Carbon::parse($request->date_from) : Carbon::now()->subMonth();
-        $dateTo = $request->date_to ? Carbon::parse($request->date_to) : Carbon::now();
+        $dateTo = $request->date_to ? Carbon::parse($request->date_to)->endOfDay() : Carbon::now()->endOfDay();
 
         $data = [];
         $title = '';
@@ -1418,26 +1439,85 @@ class AdminController extends Controller
                 break;
         }
 
+        $exportData = [
+            'title' => $title,
+            'period' => [
+                'from' => $dateFrom->toDateString(),
+                'to' => $dateTo->toDateString(),
+            ],
+            'generated_at' => Carbon::now()->toDateTimeString(),
+            'total_records' => count($data),
+            'data' => $data,
+        ];
+
         // Generate sesuai format
         if ($request->format === 'pdf') {
-            $exportData = [
-                'title' => $title,
-                'period' => [
-                    'from' => $dateFrom->toDateString(),
-                    'to' => $dateTo->toDateString(),
-                ],
-                'generated_at' => Carbon::now()->toDateTimeString(),
-                'total_records' => count($data),
-                'data' => $data,
-            ];
+            try {
+                $pdf = Pdf::loadView('pdf.admin-export', [
+                    'exportData' => $exportData,
+                    'title' => $title
+                ]);
 
-            return $this->generateExportPDF($exportData);
+                $pdf->setPaper('A4', 'landscape');
+                $pdf->setOptions([
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => false,
+                    'defaultFont' => 'sans-serif',
+                ]);
+
+                $filename = Str::slug($title) . '-' . date('Y-m-d') . '.pdf';
+
+                return $pdf->download($filename);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Gagal export PDF: ' . $e->getMessage()
+                ], 500);
+            }
         }
 
         if ($request->format === 'csv') {
-            return $this->generateCSV($data, Str::slug($title));
+            try {
+                $filename = Str::slug($title) . '-' . date('Y-m-d') . '.csv';
+
+                $headers = [
+                    'Content-Type' => 'text/csv; charset=UTF-8',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                    'Pragma' => 'no-cache',
+                    'Expires' => '0',
+                ];
+
+                // Buat CSV
+                $callback = function() use ($data) {
+                    $file = fopen('php://output', 'w');
+
+                    // Tambahkan BOM untuk UTF-8
+                    fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                    if (!empty($data)) {
+                        // Header
+                        fputcsv($file, array_keys($data[0]));
+
+                        // Data
+                        foreach ($data as $row) {
+                            fputcsv($file, $row);
+                        }
+                    }
+
+                    fclose($file);
+                };
+
+                return response()->stream($callback, 200, $headers);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Gagal export CSV: ' . $e->getMessage()
+                ], 500);
+            }
         }
 
+        // Default return JSON
         return response()->json([
             'message' => 'Data exported successfully',
             'type' => $request->type,
@@ -1447,9 +1527,7 @@ class AdminController extends Controller
         ], 200);
     }
 
-    // ============= PRIVATE HELPER METHODS FOR REPORT =============
-
-    private function getDefaultDateFrom($type)
+     private function getDefaultDateFrom($type)
     {
         switch ($type) {
             case 'daily':
@@ -1461,24 +1539,22 @@ class AdminController extends Controller
             case 'yearly':
                 return Carbon::now()->startOfYear();
             default:
-                return Carbon::now()->startOfMonth();
+                return Carbon::now()->subMonth();
         }
     }
 
     private function calculateAcceptanceRate($dateFrom, $dateTo)
     {
-        $total = Validation::whereBetween('created_at', [$dateFrom, $dateTo])
-            ->whereIn('status', ['accepted', 'declined'])
-            ->count();
-
+        $total = Validation::whereBetween('created_at', [$dateFrom, $dateTo])->count();
         if ($total === 0) return 0;
 
         $accepted = Validation::whereBetween('created_at', [$dateFrom, $dateTo])
             ->where('status', 'accepted')
             ->count();
 
-        return round(($accepted / $total) * 100, 2) . '%';
+        return round(($accepted / $total) * 100, 2);
     }
+
 
     private function getValidationsByStatus($dateFrom, $dateTo)
     {

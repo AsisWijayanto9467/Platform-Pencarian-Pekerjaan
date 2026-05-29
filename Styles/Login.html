@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Seekers Platform - Login</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Custom CSS untuk menyesuaikan tampilan seperti React version */
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        
+        .jumbotron {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+        
+        .jumbotron .display-4 {
+            font-weight: 300;
+            margin-bottom: 0;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 20px;
+        }
+        
+        .card-body {
+            padding: 30px;
+        }
+        
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 30px;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding: 30px 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+        
+        .alert {
+            border-radius: 5px;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .text-right {
+                text-align: left;
+            }
+            
+            .jumbotron {
+                padding: 40px 0;
+            }
+            
+            .jumbotron .display-4 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Job Seekers Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Jumbotron / Hero Section -->
+        <header class="jumbotron">
+            <div class="container text-center">
+                <h1 class="display-4">Job Seekers Platform</h1>
+            </div>
+        </header>
+
+        <!-- Login Form -->
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <form id="loginForm" class="card card-default">
+                        <div class="card-header">
+                            <h4 class="mb-0">Login</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Error Message -->
+                            <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none;">
+                            </div>
+                            
+                            <!-- Email Field -->
+                            <div class="form-group row align-items-center mb-3">
+                                <div class="col-4 text-right">
+                                    <label class="form-label mb-0">Email</label>
+                                </div>
+                                <div class="col-8">
+                                    <input 
+                                        id="email"
+                                        name="email" 
+                                        type="email" 
+                                        class="form-control" 
+                                        placeholder="Enter your email"
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                            
+                            <!-- Password Field -->
+                            <div class="form-group row align-items-center mb-3">
+                                <div class="col-4 text-right">
+                                    <label class="form-label mb-0">Password</label>
+                                </div>
+                                <div class="col-8">
+                                    <input 
+                                        id="password"
+                                        name="password" 
+                                        type="password" 
+                                        class="form-control" 
+                                        placeholder="Enter your password"
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="form-group row align-items-center mt-4">
+                                <div class="col-4"></div>
+                                <div class="col-8">
+                                    <button 
+                                        id="loginButton"
+                                        class="btn btn-primary" 
+                                        type="submit"
+                                    >
+                                        Login
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Register Link -->
+                            <div class="text-center mt-3">
+                                <span>Don't have account? </span>
+                                <a href="/register">
+                                    Register here
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="text-center py-4 text-muted">
+                Copyright &copy; 2023 - Web Tech ID
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // API Configuration - Sesuaikan dengan URL API Anda
+        const API_BASE_URL = 'http://localhost:3000/api'; // Ganti dengan URL API Anda
+        
+        // State Management (menggantikan useState React)
+        let state = {
+            loading: false,
+            error: '',
+            email: '',
+            password: ''
+        };
+
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const errorMessageDiv = document.getElementById('errorMessage');
+
+        // Fungsi untuk membuat HTTP request (menggantikan axios)
+        async function apiRequest(method, endpoint, data = null) {
+            const url = API_BASE_URL + endpoint;
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+            
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+            
+            // Tambahkan token jika ada
+            const token = localStorage.getItem('token');
+            if (token) {
+                options.headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch(url, options);
+            const responseData = await response.json();
+            
+            if (!response.ok) {
+                const error = new Error(responseData.message || 'Request failed');
+                error.response = {
+                    status: response.status,
+                    data: responseData
+                };
+                throw error;
+            }
+            
+            return { data: responseData };
+        }
+
+        // Fungsi untuk menampilkan error
+        function showError(message) {
+            state.error = message;
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+        }
+
+        // Fungsi untuk menyembunyikan error
+        function hideError() {
+            state.error = '';
+            errorMessageDiv.style.display = 'none';
+        }
+
+        // Fungsi untuk mengatur loading state
+        function setLoading(isLoading) {
+            state.loading = isLoading;
+            loginButton.disabled = isLoading;
+            loginButton.textContent = isLoading ? 'Logging in...' : 'Login';
+        }
+
+        // Fungsi navigasi (menggantikan useNavigate React Router)
+        function navigate(path) {
+            window.location.href = path;
+        }
+
+        // Event listener untuk input email
+        emailInput.addEventListener('input', (e) => {
+            state.email = e.target.value;
+        });
+
+        // Event listener untuk input password
+        passwordInput.addEventListener('input', (e) => {
+            state.password = e.target.value;
+        });
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Update state dari form
+            state.email = emailInput.value;
+            state.password = passwordInput.value;
+            
+            // Set loading state
+            setLoading(true);
+            hideError();
+
+            try {
+                // Kirim request login
+                const res = await apiRequest('POST', '/auth/login', {
+                    email: state.email,
+                    password: state.password
+                });
+
+                const token = res.data.data.token;
+                const userData = res.data.data.user;
+                const profileData = res.data.data.profile;
+
+                // Simpan data ke localStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(userData));
+                localStorage.setItem('profile', JSON.stringify(profileData));
+
+                // Redirect berdasarkan role
+                switch (userData.role) {
+                    case 'admin':
+                        navigate('/admin/dashboard');
+                        break;
+                    case 'officer':
+                        navigate('/officer/dashboard');
+                        break;
+                    case 'validator':
+                        navigate('/validator/dashboard');
+                        break;
+                    case 'society':
+                        navigate('/dashboard');
+                        break;
+                    default:
+                        navigate('/dashboard');
+                }
+            } catch (err) {
+                // Handle error
+                if (err.response && err.response.data && err.response.data.message) {
+                    showError(err.response.data.message);
+                } else {
+                    showError('Login failed. Please try again.');
+                }
+                console.error('Login error:', err);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // For demo purposes - jika API tidak tersedia
+        // Anda bisa meng-uncomment kode di bawah ini untuk testing
+        /*
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            setLoading(true);
+            hideError();
+            
+            setTimeout(() => {
+                // Demo login
+                const demoUser = {
+                    token: 'demo-token-123',
+                    user: {
+                        id: 1,
+                        name: 'Demo User',
+                        email: emailInput.value,
+                        role: 'society' // Bisa diganti untuk test role berbeda
+                    },
+                    profile: {
+                        full_name: 'Demo User',
+                        phone: '08123456789'
+                    }
+                };
+                
+                localStorage.setItem('token', demoUser.token);
+                localStorage.setItem('user', JSON.stringify(demoUser.user));
+                localStorage.setItem('profile', JSON.stringify(demoUser.profile));
+                
+                // Redirect to dashboard
+                navigate('/dashboard');
+                
+                setLoading(false);
+            }, 1500);
+        });
+        */
+    </script>
+</body>
+</html>

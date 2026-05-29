@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPortal - Lowongan Pekerjaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background-color:#f5f5f5;overflow-x:hidden}
+        .navbar-dark .navbar-nav .nav-link{color:rgba(255,255,255,0.85)}
+        .navbar-dark .navbar-nav .nav-link:hover{color:#fff;background-color:rgba(255,255,255,0.1)}
+        .navbar-dark .navbar-nav .nav-link.active{background-color:rgba(255,255,255,0.25)!important;color:#fff!important}
+        .dropdown-item{font-size:0.9rem;cursor:pointer;transition:all 0.15s ease}
+        .dropdown-item:hover{background-color:#f8f9fa}
+        .dropdown-menu.show{display:block}
+        .vacancy-card{border-radius:12px;transition:transform 0.2s,box-shadow 0.2s}
+        .vacancy-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.1)!important}
+        .position-badge{padding:6px 10px;border-radius:8px;font-size:0.8rem;display:inline-block;margin:2px}
+        .modal-backdrop-custom{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px}
+        .modal-custom{background:white;border-radius:10px;width:420px;max-width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;padding:32px}
+        .detail-modal{background:white;border-radius:12px;width:700px;max-width:100%;max-height:90vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+        @media(max-width:991px){.navbar-collapse{background-color:#2c3e50;border-radius:0 0 12px 12px;padding:12px;margin-top:8px;box-shadow:0 8px 20px rgba(0,0,0,0.2)}.navbar-nav{gap:4px}.navbar-nav .nav-link{border-radius:8px!important;padding:10px 16px!important}.dropdown-menu.show{position:static!important;background-color:#34495e;border:1px solid rgba(255,255,255,0.1)}.dropdown-menu .dropdown-item{color:#fff}.dropdown-menu .dropdown-item:hover{background-color:rgba(255,255,255,0.1);color:#fff}}
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+                <div class="bg-white rounded d-flex align-items-center justify-content-center me-2" style="width:32px;height:32px"><i class="fas fa-briefcase text-primary" style="font-size:16px"></i></div>
+                <span style="font-weight:700;font-size:1.2rem">JobPortal</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" onclick="toggleMobileMenu()" style="padding:4px 8px"><i class="fas fa-bars text-white" id="mobileMenuIcon" style="font-size:20px"></i></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto" id="navbarLinks">
+                    <li class="nav-item"><a href="/dashboard" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-tachometer-alt me-2" style="font-size:14px"></i>Dashboard</a></li>
+                    <li class="nav-item"><a href="/profile" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-user-circle me-2" style="font-size:14px"></i>Profil Saya</a></li>
+                    <li class="nav-item"><a href="/validation" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-clipboard-check me-2" style="font-size:14px"></i>Validasi</a></li>
+                    <li class="nav-item"><a href="/job-vacancies" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded active" style="font-size:0.9rem;font-weight:600;background-color:rgba(255,255,255,0.25)"><i class="fas fa-briefcase me-2" style="font-size:14px"></i>Lowongan</a></li>
+                    <li class="nav-item"><a href="/application" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-file-alt me-2" style="font-size:14px"></i>Lamaran</a></li>
+                    <li class="nav-item"><a href="/history" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-history me-2" style="font-size:14px"></i>Riwayat</a></li>
+                </ul>
+                <div class="d-flex align-items-center ms-lg-3 mt-2 mt-lg-0">
+                    <a href="/notifications" class="btn btn-link text-white position-relative me-2" style="text-decoration:none;padding:8px 10px"><i class="fas fa-bell" style="font-size:18px"></i><span class="badge bg-danger position-absolute" style="top:2px;right:2px;font-size:10px;padding:3px 5px;line-height:1">3</span></a>
+                    <div class="position-relative" id="userDropdownContainer">
+                        <button class="btn btn-link text-white d-flex align-items-center" onclick="toggleUserDropdown()" style="text-decoration:none;padding:8px 10px">
+                            <div class="rounded-circle bg-white d-flex align-items-center justify-content-center me-2" style="width:30px;height:30px"><span class="text-primary fw-bold" style="font-size:14px">B</span></div>
+                            <span class="d-none d-md-inline text-white" style="font-size:0.9rem">Budi Santoso</span>
+                            <i class="fas fa-chevron-down ms-2" id="userDropdownIcon" style="font-size:10px"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow border-0" id="userDropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:8px;border-radius:8px;min-width:220px;z-index:1000">
+                            <div class="px-3 py-2 border-bottom"><p class="mb-0 fw-bold" style="font-size:0.9rem">Budi Santoso</p><small class="text-muted" style="font-size:0.8rem">budi@email.com</small></div>
+                            <a class="dropdown-item py-2" href="/profile"><i class="fas fa-user-circle me-2 text-primary"></i>Profil Saya</a>
+                            <a class="dropdown-item py-2" href="/validation"><i class="fas fa-clipboard-check me-2 text-success"></i>Status Validasi</a>
+                            <a class="dropdown-item py-2" href="/bookmarks"><i class="fas fa-bookmark me-2 text-warning"></i>Bookmark</a>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item py-2 text-danger" onclick="showLogoutPopup()"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1" style="background-color:#f5f5f5;padding-top:76px;padding-bottom:24px">
+        <div class="container">
+            <!-- Success/Error Banners -->
+            <div id="successBanner" class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius:10px;display:none"><i class="fas fa-check-circle me-2"></i><strong>Berhasil!</strong> <span id="successText"></span><button type="button" class="btn-close" onclick="document.getElementById('successBanner').style.display='none'"></button></div>
+            <div id="errorBanner" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius:10px;display:none"><i class="fas fa-exclamation-triangle me-2"></i><span id="errorText"></span><button type="button" class="btn-close" onclick="document.getElementById('errorBanner').style.display='none'"></button></div>
+
+            <!-- Header Section -->
+            <div class="row mb-4"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px"><div class="card-body p-4"><div class="d-flex align-items-center justify-content-between mb-3"><div><h5 class="mb-1 fw-bold" style="color:#2c3e50"><i class="fas fa-briefcase text-primary me-2"></i>Lowongan Pekerjaan</h5><p class="text-muted mb-0" style="font-size:0.9rem">Temukan pekerjaan yang sesuai dengan keahlian Anda</p></div></div>
+                <form onsubmit="handleSearch(event)"><div class="input-group" style="border-radius:10px;overflow:hidden"><input type="text" class="form-control" id="searchInput" placeholder="Cari lowongan, perusahaan, atau posisi..." style="border-radius:10px 0 0 10px;border:1px solid #e0e0e0"><button class="btn btn-primary" type="submit" style="border-radius:0;border:none"><i class="fas fa-search me-2"></i>Cari</button><button class="btn btn-outline-secondary" type="button" id="clearSearchBtn" style="display:none" onclick="clearSearch()"><i class="fas fa-times"></i></button><button class="btn btn-outline-primary" type="button" onclick="showFilterModal()" style="border-radius:0 10px 10px 0"><i class="fas fa-filter me-2"></i>Filter</button></div></form>
+                <div class="mt-2" id="searchInfo" style="display:none"><small class="text-muted"><i class="fas fa-info-circle me-1"></i><span id="searchInfoText"></span></small></div>
+            </div></div></div></div>
+
+            <!-- Tab Navigation -->
+            <div class="row mb-3"><div class="col-12"><div class="d-flex" style="gap:10px">
+                <button class="btn" id="tabAll" onclick="switchTab('all')" style="border-radius:10px;background-color:#3498db;color:white;border:none;padding:10px 20px;font-weight:600"><i class="fas fa-list me-2"></i>Semua Lowongan</button>
+                <button class="btn" id="tabRecommended" onclick="switchTab('recommended')" style="border-radius:10px;background-color:#f8f9fa;color:#6c757d;border:none;padding:10px 20px;font-weight:600"><i class="fas fa-star me-2"></i>Rekomendasi</button>
+                <button class="btn" id="tabBookmarked" onclick="switchTab('bookmarked')" style="border-radius:10px;background-color:#f8f9fa;color:#6c757d;border:none;padding:10px 20px;font-weight:600"><i class="fas fa-bookmark me-2"></i>Tersimpan</button>
+            </div></div></div>
+
+            <!-- Vacancies List -->
+            <div class="row" id="vacanciesContainer"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-top mt-auto"><div class="container"><div class="d-flex justify-content-between align-items-center py-3"><small class="text-muted" style="font-size:0.85rem">&copy; 2026 JobPortal - Sistem Pencari Kerja</small><small class="text-muted" style="font-size:0.85rem"><i class="fas fa-shield-alt me-1"></i>Sistem Terproteksi</small></div></div></footer>
+
+    <!-- Detail Modal -->
+    <div class="modal-backdrop-custom" id="detailModal" style="display:none"><div class="detail-modal" id="detailModalContent" onclick="event.stopPropagation()"></div></div>
+
+    <!-- Apply Modal -->
+    <div class="modal-backdrop-custom" id="applyModal" style="display:none"><div class="modal-custom" onclick="event.stopPropagation()"><div class="mb-3"><i class="fas fa-paper-plane" style="font-size:48px;color:#3498db;background-color:#e8f4fd;padding:16px;border-radius:50%"></i></div><h5 class="mb-3 fw-bold">Lamar Pekerjaan</h5><p class="text-muted mb-3" id="applyCompanyName"></p><div class="mb-3 text-start"><label class="form-label">Pilih Posisi</label><select class="form-select" id="applyPosition" style="border-radius:8px"><option value="">-- Pilih Posisi --</option></select><small class="text-danger" id="applyError" style="display:none"></small></div><div class="d-flex gap-2 justify-content-center mt-4"><button class="btn btn-light" onclick="hideApplyModal()" style="padding:10px 24px;border-radius:8px"><i class="fas fa-times me-2"></i>Batal</button><button class="btn btn-primary" onclick="handleApplyJob()" style="padding:10px 24px;border-radius:8px;background:linear-gradient(135deg,#3498db 0%,#2980b9 100%);border:none"><i class="fas fa-paper-plane me-2"></i>Kirim Lamaran</button></div></div></div>
+
+    <!-- Filter Modal -->
+    <div class="modal-backdrop-custom" id="filterModal" style="display:none"><div class="modal-custom" style="text-align:left" onclick="event.stopPropagation()"><h5 class="mb-4 fw-bold"><i class="fas fa-filter me-2 text-primary"></i>Filter Lowongan</h5><div class="mb-3"><label class="form-label">Kategori Pekerjaan</label><select class="form-select" id="filterCategory" style="border-radius:8px"><option value="">Semua Kategori</option><option value="1">IT</option><option value="2">Desain</option><option value="3">Manajemen</option><option value="4">Hospitality</option><option value="5">Pendidikan</option></select></div><div class="mb-3"><label class="form-label">Posisi</label><input type="text" class="form-control" id="filterPosition" placeholder="Cari posisi..." style="border-radius:8px"></div><div class="mb-3"><label class="form-label">Urutkan Berdasarkan</label><select class="form-select" id="filterSortBy" style="border-radius:8px"><option value="created_at">Tanggal Posting</option><option value="company">Nama Perusahaan</option></select></div><div class="d-flex gap-2 justify-content-end mt-4"><button class="btn btn-light me-2" onclick="clearFilter()" style="padding:10px 24px;border-radius:8px"><i class="fas fa-redo me-2"></i>Reset</button><button class="btn btn-primary" onclick="applyFilter()" style="padding:10px 24px;border-radius:8px;background:linear-gradient(135deg,#3498db 0%,#2980b9 100%);border:none"><i class="fas fa-check me-2"></i>Terapkan</button></div></div></div>
+
+    <!-- Logout Popup -->
+    <div class="modal-backdrop-custom" id="logoutPopup" style="display:none"><div class="modal-custom" onclick="event.stopPropagation()"><div style="margin-bottom:20px"><i class="fas fa-sign-out-alt" style="font-size:48px;color:#dc3545;background-color:#f8d7da;padding:16px;border-radius:50%"></i></div><h5 style="margin-bottom:12px;font-weight:bold;color:#333;font-size:1.25rem">Konfirmasi Logout</h5><p style="color:#666;margin-bottom:6px;font-size:1rem">Apakah Anda yakin ingin keluar?</p><small style="color:#999;display:block;margin-bottom:24px;font-size:0.9rem">Anda akan diarahkan ke halaman login</small><div style="display:flex;gap:12px;justify-content:center"><button class="btn btn-light" onclick="hideLogoutPopup()" style="padding:10px 24px;font-size:0.95rem;min-width:110px;border-radius:8px"><i class="fas fa-times me-2"></i>Batal</button><button class="btn btn-danger" onclick="handleLogout()" style="padding:10px 24px;font-size:0.95rem;min-width:110px;border-radius:8px"><i class="fas fa-check me-2"></i>Ya, Keluar</button></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==================== HARDCODED DATA ====================
+        const vacanciesData = [
+            { id: 1, company: 'PT Teknologi Maju', address: 'Jl. Sudirman No. 123, Jakarta Pusat', description: 'Perusahaan teknologi terkemuka yang bergerak di bidang pengembangan software, web, dan mobile application. Kami mencari talenta terbaik untuk bergabung dengan tim kami.', category: { id: 1, job_category: 'IT' }, avaliable_position: [{ id: 1, position: 'Software Engineer', capacity: 5, apply_capacity: 3 }, { id: 2, position: 'UI/UX Designer', capacity: 3, apply_capacity: 1 }], is_bookmarked: true, has_applied: false },
+            { id: 2, company: 'PT Inovasi Digital', address: 'Jl. Gatot Subroto No. 45, Surabaya', description: 'Perusahaan inovasi digital yang fokus pada pengembangan solusi teknologi untuk bisnis. Kami membuka kesempatan bagi profesional muda.', category: { id: 1, job_category: 'IT' }, avaliable_position: [{ id: 3, position: 'Data Analyst', capacity: 4, apply_capacity: 2 }, { id: 4, position: 'Project Manager', capacity: 2, apply_capacity: 1 }], is_bookmarked: false, has_applied: true },
+            { id: 3, company: 'CV Karya Bersama', address: 'Jl. Industri No. 78, Bandung', description: 'Perusahaan manufaktur berkualitas tinggi yang memproduksi berbagai produk industri. Membutuhkan tenaga kerja terampil.', category: { id: 2, job_category: 'Manufaktur' }, avaliable_position: [{ id: 5, position: 'Operator Produksi', capacity: 10, apply_capacity: 5 }], is_bookmarked: true, has_applied: false },
+            { id: 4, company: 'PT Pariwisata Bali', address: 'Jl. Sunset Road No. 12, Denpasar', description: 'Industri pariwisata terdepan di Bali yang menyediakan layanan perjalanan dan akomodasi terbaik. Bergabunglah dengan kami!', category: { id: 3, job_category: 'Hospitality' }, avaliable_position: [{ id: 6, position: 'Marketing', capacity: 3, apply_capacity: 2 }, { id: 7, position: 'Customer Service', capacity: 5, apply_capacity: 5 }], is_bookmarked: false, has_applied: false },
+            { id: 5, company: 'PT Edukasi Nusantara', address: 'Jl. Pendidikan No. 90, Yogyakarta', description: 'Lembaga pendidikan terpercaya yang berkomitmen mencerdaskan kehidupan bangsa. Mencari pendidik berkualitas.', category: { id: 4, job_category: 'Pendidikan' }, avaliable_position: [{ id: 8, position: 'Guru Matematika', capacity: 2, apply_capacity: 1 }, { id: 9, position: 'Guru Bahasa Inggris', capacity: 2, apply_capacity: 0 }], is_bookmarked: false, has_applied: false },
+            { id: 6, company: 'PT Solusi Informatika', address: 'Jl. Pemuda No. 56, Jakarta Timur', description: 'Penyedia solusi IT terintegrasi untuk bisnis skala kecil hingga enterprise. Kami membutuhkan tenaga profesional.', category: { id: 1, job_category: 'IT' }, avaliable_position: [{ id: 10, position: 'Network Engineer', capacity: 3, apply_capacity: 1 }, { id: 11, position: 'System Administrator', capacity: 2, apply_capacity: 0 }], is_bookmarked: true, has_applied: false }
+        ];
+        const recommendedJobsData = [
+            { id: 5, company: 'PT Edukasi Nusantara', address: 'Jl. Pendidikan No. 90, Yogyakarta', description: 'Lembaga pendidikan terpercaya...', category: { id: 4, job_category: 'Pendidikan' }, avaliable_position: [{ id: 8, position: 'Guru Matematika', capacity: 2, apply_capacity: 1 }], is_bookmarked: false, has_applied: false },
+            { id: 6, company: 'PT Solusi Informatika', address: 'Jl. Pemuda No. 56, Jakarta Timur', description: 'Penyedia solusi IT terintegrasi...', category: { id: 1, job_category: 'IT' }, avaliable_position: [{ id: 10, position: 'Network Engineer', capacity: 3, apply_capacity: 1 }], is_bookmarked: true, has_applied: false }
+        ];
+        const bookmarkedJobsData = [
+            { id: 1, company: 'PT Teknologi Maju', address: 'Jl. Sudirman No. 123', description: 'Perusahaan teknologi terkemuka...', category: { id: 1, job_category: 'IT' }, avaliable_position: [{ id: 1, position: 'Software Engineer', capacity: 5, apply_capacity: 3 }], is_bookmarked: true, has_applied: false },
+            { id: 3, company: 'CV Karya Bersama', address: 'Jl. Industri No. 78', description: 'Perusahaan manufaktur berkualitas...', category: { id: 2, job_category: 'Manufaktur' }, avaliable_position: [{ id: 5, position: 'Operator Produksi', capacity: 10, apply_capacity: 5 }], is_bookmarked: true, has_applied: false },
+            { id: 6, company: 'PT Solusi Informatika', address: 'Jl. Pemuda No. 56', description: 'Penyedia solusi IT terintegrasi...', category: { id: 1, job_category: 'IT' }, avaliable_position: [{ id: 10, position: 'Network Engineer', capacity: 3, apply_capacity: 1 }], is_bookmarked: true, has_applied: false }
+        ];
+
+        let activeTab='all',selectedVacancyId=null,isSearching=false;
+
+        function getPositionBadgeColor(i){const c=['#3498db','#2ecc71','#e74c3c','#f39c12','#9b59b6'];return c[i%c.length]}
+        function truncateText(t,m=100){return t&&t.length>m?t.substring(0,m)+'...':t||''}
+        function showBanner(t,m){document.getElementById(t+'Banner').style.display='block';document.getElementById(t+'Text').textContent=m;setTimeout(()=>document.getElementById(t+'Banner').style.display='none',5000)}
+
+        function getDisplayedVacancies(){
+            if(isSearching){const kw=document.getElementById('searchInput').value.toLowerCase();return vacanciesData.filter(v=>v.company.toLowerCase().includes(kw)||v.description.toLowerCase().includes(kw)||v.category?.job_category?.toLowerCase().includes(kw))}
+            switch(activeTab){case'recommended':return recommendedJobsData;case'bookmarked':return bookmarkedJobsData;default:return vacanciesData}
+        }
+
+        function renderVacancies(){
+            const data=getDisplayedVacancies(),container=document.getElementById('vacanciesContainer');
+            if(data.length===0){container.innerHTML=`<div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px"><div class="card-body text-center py-5"><i class="fas fa-search fa-4x text-muted mb-3 d-block"></i><h5 class="text-muted">Tidak Ada Lowongan</h5><p class="text-muted">${activeTab==='bookmarked'?'Anda belum menyimpan lowongan apapun':activeTab==='recommended'?'Tidak ada rekomendasi lowongan saat ini':'Belum ada lowongan pekerjaan yang tersedia'}</p></div></div></div>`;return}
+            container.innerHTML=data.map(v=>{const posHTML=(v.avaliable_position||[]).slice(0,3).map((p,i)=>`<span class="position-badge" style="background-color:${getPositionBadgeColor(i)}15;color:${getPositionBadgeColor(i)};border:1px solid ${getPositionBadgeColor(i)}30">${p.position}<span style="opacity:0.7;margin-left:4px">(${p.apply_capacity}/${p.capacity})</span></span>`).join('')+((v.avaliable_position||[]).length>3?`<span class="position-badge" style="background-color:#f0f0f0;color:#888">+${v.avaliable_position.length-3} lainnya</span>`:'');
+                return `<div class="col-lg-6 mb-4"><div class="card border-0 shadow-sm h-100 vacancy-card"><div class="card-body p-4"><div class="d-flex justify-content-between align-items-start mb-3"><div class="d-flex align-items-center"><div class="d-flex align-items-center justify-content-center me-3" style="width:50px;height:50px;border-radius:12px;background-color:#e8f4fd"><i class="fas fa-building" style="color:#3498db;font-size:22px"></i></div><div><h6 class="mb-1 fw-bold" style="color:#2c3e50">${v.company}</h6><small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${v.address||'Lokasi tidak tersedia'}</small></div></div><button class="btn btn-sm" onclick="toggleBookmark(${v.id},${v.is_bookmarked})" style="border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background-color:${v.is_bookmarked?'#fef3f2':'#f8f9fa'};border:none"><i class="${v.is_bookmarked?'fas':'far'} fa-bookmark" style="color:${v.is_bookmarked?'#e74c3c':'#bdc3c7'};font-size:18px"></i></button></div>
+                ${v.category?`<div class="mb-3"><span class="badge" style="background-color:#f0f0f0;color:#555;padding:6px 12px;border-radius:20px;font-size:0.8rem"><i class="fas fa-tag me-1"></i>${v.category.job_category}</span></div>`:''}
+                <p class="text-muted mb-3" style="font-size:0.9rem">${truncateText(v.description,120)}</p>
+                <div class="mb-3"><small class="text-muted d-block mb-2"><i class="fas fa-users me-1"></i>Posisi Tersedia:</small><div class="d-flex flex-wrap" style="gap:8px">${posHTML}</div></div>
+                <div class="text-end"><button class="btn btn-primary btn-sm" onclick="viewDetail(${v.id})" style="border-radius:8px;padding:8px 20px;background:linear-gradient(135deg,#3498db 0%,#2980b9 100%);border:none"><i class="fas fa-eye me-2"></i>Lihat Detail</button></div></div></div></div>`}).join('')}
+
+        function switchTab(tab){
+            activeTab=tab;isSearching=false;document.getElementById('searchInput').value='';document.getElementById('clearSearchBtn').style.display='none';document.getElementById('searchInfo').style.display='none';
+            document.getElementById('tabAll').style.cssText='border-radius:10px;background-color:#f8f9fa;color:#6c757d;border:none;padding:10px 20px;font-weight:600';
+            document.getElementById('tabRecommended').style.cssText='border-radius:10px;background-color:#f8f9fa;color:#6c757d;border:none;padding:10px 20px;font-weight:600';
+            document.getElementById('tabBookmarked').style.cssText='border-radius:10px;background-color:#f8f9fa;color:#6c757d;border:none;padding:10px 20px;font-weight:600';
+            const ac={all:'#3498db',recommended:'#e67e22',bookmarked:'#e74c3c'};
+            document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).style.cssText=`border-radius:10px;background-color:${ac[tab]};color:white;border:none;padding:10px 20px;font-weight:600`;
+            renderVacancies();
+        }
+
+        function handleSearch(e){e.preventDefault();const kw=document.getElementById('searchInput').value.trim();if(!kw){clearSearch();return}isSearching=true;activeTab='all';document.getElementById('clearSearchBtn').style.display='inline-block';const results=getDisplayedVacancies();document.getElementById('searchInfo').style.display='block';document.getElementById('searchInfoText').textContent=`Ditemukan ${results.length} hasil untuk "${kw}"`;document.querySelectorAll('#navbarLinks .nav-link').forEach(l=>l.classList.remove('active'));switchTab('all');renderVacancies()}
+        function clearSearch(){isSearching=false;document.getElementById('searchInput').value='';document.getElementById('clearSearchBtn').style.display='none';document.getElementById('searchInfo').style.display='none';switchTab('all');renderVacancies()}
+
+        function viewDetail(id){
+            const v=vacanciesData.find(x=>x.id===id)||recommendedJobsData.find(x=>x.id===id)||bookmarkedJobsData.find(x=>x.id===id);if(!v)return;selectedVacancyId=id;
+            const posHTML=(v.avaliable_position||[]).map(p=>{const pct=Math.round((p.apply_capacity/p.capacity)*100);return`<div class="col-md-6 mb-2"><div class="d-flex align-items-center justify-content-between p-3" style="background-color:#f8f9fa;border-radius:8px"><div><span style="font-weight:600;font-size:0.9rem">${p.position}</span><br><small class="text-muted">${p.apply_capacity}/${p.capacity} pelamar</small></div><div style="width:50px;height:50px;border-radius:50%;background-color:${p.apply_capacity>=p.capacity?'#f8d7da':'#d4edda'};display:flex;align-items:center;justify-content:center"><span style="font-size:1.2rem;font-weight:bold;color:${p.apply_capacity>=p.capacity?'#dc3545':'#28a745'}">${p.capacity-p.apply_capacity}</span></div></div></div>`}).join('');
+            document.getElementById('detailModalContent').innerHTML=`
+                <div class="p-4" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px 12px 0 0"><div class="d-flex justify-content-between align-items-start"><div><h5 class="text-white mb-1 fw-bold">${v.company}</h5><p class="text-white mb-0" style="opacity:0.9;font-size:0.9rem"><i class="fas fa-map-marker-alt me-1"></i>${v.address}</p></div><button class="btn btn-sm" onclick="toggleBookmark(${v.id},${v.is_bookmarked})" style="border-radius:50%;width:45px;height:45px;display:flex;align-items:center;justify-content:center;background-color:rgba(255,255,255,0.2);border:none"><i class="${v.is_bookmarked?'fas':'far'} fa-bookmark" style="color:white;font-size:20px"></i></button></div>${v.category?`<span class="badge mt-2" style="background-color:rgba(255,255,255,0.2);color:white;padding:6px 12px;border-radius:20px">${v.category.job_category}</span>`:''}</div>
+                <div class="p-4"><div class="mb-4"><h6 class="fw-bold mb-2" style="color:#2c3e50"><i class="fas fa-info-circle me-2" style="color:#3498db"></i>Deskripsi Pekerjaan</h6><p class="text-muted" style="line-height:1.8;white-space:pre-line">${v.description}</p></div><div class="mb-4"><h6 class="fw-bold mb-3" style="color:#2c3e50"><i class="fas fa-users me-2" style="color:#2ecc71"></i>Posisi Tersedia</h6><div class="row">${posHTML}</div></div><div class="text-end">${v.has_applied?'<button class="btn btn-success" disabled style="border-radius:8px"><i class="fas fa-check-circle me-2"></i>Sudah Melamar</button>':'<button class="btn btn-success" onclick="showApplyModal()" style="border-radius:8px"><i class="fas fa-paper-plane me-2"></i>Lamar Sekarang</button>'}</div></div>`;
+            document.getElementById('detailModal').style.display='flex';
+        }
+        function hideDetailModal(){document.getElementById('detailModal').style.display='none'}
+        document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===this)hideDetailModal()});
+
+        function showApplyModal(){
+            const v=vacanciesData.find(x=>x.id===selectedVacancyId)||recommendedJobsData.find(x=>x.id===selectedVacancyId)||bookmarkedJobsData.find(x=>x.id===selectedVacancyId);if(!v)return;
+            document.getElementById('applyCompanyName').textContent=v.company;
+            const sel=document.getElementById('applyPosition');sel.innerHTML='<option value="">-- Pilih Posisi --</option>'+(v.avaliable_position||[]).map(p=>`<option value="${p.id}" ${p.apply_capacity>=p.capacity?'disabled':''}>${p.position} (${p.apply_capacity}/${p.capacity})${p.apply_capacity>=p.capacity?' - PENUH':''}</option>`).join('');
+            document.getElementById('applyError').style.display='none';document.getElementById('applyModal').style.display='flex';
+        }
+        function hideApplyModal(){document.getElementById('applyModal').style.display='none'}
+        document.getElementById('applyModal').addEventListener('click',function(e){if(e.target===this)hideApplyModal()});
+
+        function handleApplyJob(){
+            const pos=document.getElementById('applyPosition').value;
+            if(!pos){document.getElementById('applyError').textContent='Silakan pilih posisi yang dilamar';document.getElementById('applyError').style.display='block';return}
+            hideApplyModal();showBanner('success','Lamaran berhasil dikirim!');
+            const v=vacanciesData.find(x=>x.id===selectedVacancyId);if(v)v.has_applied=true;
+        }
+
+        function toggleBookmark(id,isBookmarked){
+            const v=vacanciesData.find(x=>x.id===id)||recommendedJobsData.find(x=>x.id===id)||bookmarkedJobsData.find(x=>x.id===id);if(v)v.is_bookmarked=!v.is_bookmarked;
+            showBanner('success',v&&v.is_bookmarked?'Lowongan berhasil dibookmark':'Bookmark berhasil dihapus');renderVacancies();if(document.getElementById('detailModal').style.display==='flex')viewDetail(id);
+        }
+
+        function showFilterModal(){document.getElementById('filterModal').style.display='flex'}
+        document.getElementById('filterModal').addEventListener('click',function(e){if(e.target===this)document.getElementById('filterModal').style.display='none'});
+        function applyFilter(){document.getElementById('filterModal').style.display='none';showBanner('success','Filter berhasil diterapkan');renderVacancies()}
+        function clearFilter(){document.getElementById('filterCategory').value='';document.getElementById('filterPosition').value='';document.getElementById('filterSortBy').value='created_at';document.getElementById('filterModal').style.display='none';renderVacancies()}
+
+        // ==================== MOBILE MENU ====================
+        let mobileMenuOpen=false;
+        function toggleMobileMenu(){mobileMenuOpen=!mobileMenuOpen;document.getElementById('navbarNav').classList.toggle('show',mobileMenuOpen);document.getElementById('mobileMenuIcon').className=`fas fa-${mobileMenuOpen?'times':'bars'} text-white`}
+
+        // ==================== USER DROPDOWN ====================
+        function toggleUserDropdown(){const dd=document.getElementById('userDropdown'),icon=document.getElementById('userDropdownIcon'),isOpen=dd.style.display==='block';dd.style.display=isOpen?'none':'block';icon.className=`fas fa-chevron-${isOpen?'down':'up'} ms-2`}
+        document.addEventListener('click',function(e){const c=document.getElementById('userDropdownContainer');if(c&&!c.contains(e.target)){document.getElementById('userDropdown').style.display='none';document.getElementById('userDropdownIcon').className='fas fa-chevron-down ms-2'}});
+
+        // ==================== LOGOUT ====================
+        function showLogoutPopup(){document.getElementById('logoutPopup').style.display='flex'}
+        function hideLogoutPopup(){document.getElementById('logoutPopup').style.display='none'}
+        function handleLogout(){localStorage.clear();window.location.href='/'}
+        document.getElementById('logoutPopup').addEventListener('click',function(e){if(e.target===this)hideLogoutPopup()});
+
+        // ==================== NAVIGATION ====================
+        document.querySelectorAll('#navbarLinks .nav-link').forEach(link=>{link.addEventListener('click',function(e){e.preventDefault();document.querySelectorAll('#navbarLinks .nav-link').forEach(l=>{l.classList.remove('active');l.style.fontWeight='400';l.style.backgroundColor='transparent'});this.classList.add('active');this.style.fontWeight='600';this.style.backgroundColor='rgba(255,255,255,0.25)'})});
+
+        // Initialize
+        renderVacancies();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPortal - Lamaran Saya</title>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #28a745;
+            --warning: #f39c12;
+            --danger: #dc3545;
+            --bg-light: #f5f5f5;
+            --text-dark: #2c3e50;
+            --text-muted: #888;
+            --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            --card-shadow-hover: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.15);
+            padding: 0.5rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            color: #fff !important;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .navbar-brand .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .navbar-brand .brand-icon i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-size: 0.9rem;
+            font-weight: 400;
+            padding: 8px 16px !important;
+            border-radius: 8px;
+            margin: 0 2px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link i {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #fff !important;
+            background-color: rgba(255,255,255,0.15);
+        }
+
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255,255,255,0.25) !important;
+            color: #fff !important;
+            font-weight: 600;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 4px 8px;
+        }
+
+        .navbar-toggler:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* User Dropdown */
+        .user-dropdown-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: #fff;
+            border-radius: 10px;
+            min-width: 220px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            z-index: 1050;
+            display: none;
+            overflow: hidden;
+        }
+
+        .user-dropdown-menu.show {
+            display: block;
+        }
+
+        .user-dropdown-menu .dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-dropdown-menu .dropdown-header p {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-dropdown-menu .dropdown-header small {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .user-dropdown-menu .dropdown-item {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        .user-dropdown-menu .dropdown-item i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .user-dropdown-menu .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .user-dropdown-menu .dropdown-item.text-danger {
+            color: var(--danger);
+        }
+
+        .user-dropdown-menu .dropdown-divider {
+            border-top: 1px solid #eee;
+        }
+
+        .notification-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 8px 10px;
+            cursor: pointer;
+            position: relative;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .notification-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .notification-btn .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            padding: 3px 5px;
+            line-height: 1;
+            background: var(--danger);
+            color: #fff;
+            border-radius: 50%;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: #2c3e50;
+                border-radius: 0 0 12px 12px;
+                padding: 12px;
+                margin-top: 8px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            }
+            
+            .navbar-nav .nav-link {
+                border-radius: 8px;
+                padding: 10px 16px;
+            }
+            
+            .user-dropdown-menu {
+                position: static;
+                background: #34495e;
+                border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: none;
+            }
+            
+            .user-dropdown-menu .dropdown-item {
+                color: #fff;
+            }
+            
+            .user-dropdown-menu .dropdown-item:hover {
+                background: rgba(255,255,255,0.1);
+                color: #fff;
+            }
+            
+            .user-dropdown-menu .dropdown-header {
+                border-color: rgba(255,255,255,0.1);
+            }
+            
+            .user-dropdown-menu .dropdown-header small {
+                color: rgba(255,255,255,0.6);
+            }
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            padding-top: 80px;
+            padding-bottom: 30px;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover) !important;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: none;
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 20px;
+        }
+
+        .stat-icon.blue { background: #e8f4fd; color: var(--primary); }
+        .stat-icon.yellow { background: #fff3cd; color: var(--warning); }
+        .stat-icon.green { background: #d4edda; color: var(--success); }
+        .stat-icon.red { background: #f8d7da; color: var(--danger); }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .stat-value.blue { color: var(--primary); }
+        .stat-value.yellow { color: var(--warning); }
+        .stat-value.green { color: var(--success); }
+        .stat-value.red { color: var(--danger); }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== FILTER BUTTONS ===== */
+        .filter-btn {
+            border-radius: 20px;
+            padding: 8px 20px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .filter-btn:hover {
+            opacity: 0.85;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .filter-btn.active.pending { background: var(--warning); }
+        .filter-btn.active.accepted { background: var(--success); }
+        .filter-btn.active.rejected { background: var(--danger); }
+
+        /* ===== STATUS BADGE ===== */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            gap: 4px;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc10740;
+        }
+
+        .status-badge.accepted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #28a74540;
+        }
+
+        .status-badge.rejected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #dc354540;
+        }
+
+        /* Position tag */
+        .position-tag {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin: 3px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+            gap: 8px;
+        }
+
+        .position-tag.pending { background: #fff3cd; border: 1px solid #ffc10730; }
+        .position-tag.accepted { background: #d4edda; border: 1px solid #28a74530; }
+        .position-tag.rejected { background: #f8d7da; border: 1px solid #dc354530; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content-custom {
+            background: #fff;
+            border-radius: 12px;
+            width: 700px;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px 12px 0 0;
+            padding: 20px 24px;
+            color: #fff;
+        }
+
+        .modal-close-btn {
+            background: #fff;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Confirm Modal */
+        .confirm-modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 32px;
+            width: 420px;
+            max-width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .confirm-icon {
+            font-size: 48px;
+            padding: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        .confirm-icon.danger {
+            color: var(--danger);
+            background: #f8d7da;
+        }
+
+        .confirm-icon.warning {
+            color: var(--warning);
+            background: #fff3cd;
+        }
+
+        /* ===== SUCCESS BANNER ===== */
+        .alert-success-custom {
+            background: #d4edda;
+            color: #155724;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+
+        .alert-danger-custom {
+            background: #f8d7da;
+            color: #721c24;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #fff;
+            border-top: 1px solid #eee;
+            padding: 12px 0;
+            margin-top: auto;
+        }
+
+        .footer small {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== BTN STYLES ===== */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            opacity: 0.9;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .btn-outline-custom {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #333;
+            border-radius: 8px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline-custom:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-danger-custom {
+            background: var(--danger);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-danger-custom:hover {
+            background: #c82333;
+        }
+
+        .btn-warning-custom {
+            background: var(--warning);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-warning-custom:hover {
+            background: #e67e22;
+        }
+
+        .btn-light-custom {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #333;
+            border-radius: 8px;
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-light-custom:hover {
+            background: #e9ecef;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 767px) {
+            .stat-card {
+                margin-bottom: 12px;
+            }
+            
+            .filter-btn {
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+            
+            .modal-content-custom {
+                width: 100%;
+                max-height: 85vh;
+            }
+            
+            .confirm-modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== NAVBAR ==================== -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a href="#" class="navbar-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                JobPortal
+            </a>
+            
+            <button class="navbar-toggler" type="button" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars text-white" style="font-size:20px;"></i>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-user-circle"></i> Profil Saya
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-clipboard-check"></i> Validasi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-briefcase"></i> Lowongan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active">
+                            <i class="fas fa-file-alt"></i> Lamaran
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-history"></i> Riwayat
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center ml-lg-3 mt-2 mt-lg-0">
+                    <!-- Notifikasi -->
+                    <button class="notification-btn mr-2" title="Notifikasi">
+                        <i class="fas fa-bell" style="font-size:18px;"></i>
+                        <span class="badge">3</span>
+                    </button>
+                    
+                    <!-- User Dropdown -->
+                    <div class="position-relative" id="userDropdownContainer">
+                        <button class="user-dropdown-btn" onclick="toggleUserDropdown()">
+                            <div class="user-avatar">A</div>
+                            <span class="d-none d-md-inline" style="font-size:0.9rem;">Ahmad Fauzi</span>
+                            <i class="fas fa-chevron-down ml-2" style="font-size:10px;"></i>
+                        </button>
+                        
+                        <div class="user-dropdown-menu" id="userDropdownMenu">
+                            <div class="dropdown-header">
+                                <p>Ahmad Fauzi</p>
+                                <small>ahmad.fauzi@email.com</small>
+                            </div>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-user-circle text-primary"></i> Profil Saya
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-clipboard-check text-success"></i> Status Validasi
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-bookmark text-warning"></i> Bookmark
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item text-danger" onclick="showLogoutModal(); toggleUserDropdown();">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- Success Banner (hidden by default) -->
+            <div class="alert-success-custom" id="successBanner" style="display:none;">
+                <i class="fas fa-check-circle"></i>
+                <strong>Berhasil!</strong> <span id="successMessage"></span>
+                <button type="button" class="close ml-auto" onclick="hideSuccessBanner()">&times;</button>
+            </div>
+            
+            <!-- Error Banner (hidden by default) -->
+            <div class="alert-danger-custom" id="errorBanner" style="display:none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="errorMessage"></span>
+                <button type="button" class="close ml-auto" onclick="hideErrorBanner()">&times;</button>
+            </div>
+
+            <!-- Header Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h5 class="mb-1 fw-bold" style="color: #2c3e50;">
+                                        <i class="fas fa-file-alt text-primary mr-2"></i>
+                                        Lamaran Saya
+                                    </h5>
+                                    <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                                        Pantau status lamaran pekerjaan Anda
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4" id="statsContainer">
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card shadow-sm stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <p class="stat-value blue" id="statTotal">6</p>
+                        <small class="stat-label">Total Lamaran</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card shadow-sm stat-card">
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <p class="stat-value yellow" id="statPending">2</p>
+                        <small class="stat-label">Pending</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card shadow-sm stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <p class="stat-value green" id="statAccepted">3</p>
+                        <small class="stat-label">Diterima</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card shadow-sm stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <p class="stat-value red" id="statRejected">1</p>
+                        <small class="stat-label">Ditolak</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Status -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap" style="gap: 8px;">
+                        <button class="filter-btn active" onclick="filterApplications('all', this)" data-filter="all">
+                            <i class="fas fa-list mr-2"></i>Semua
+                        </button>
+                        <button class="filter-btn" onclick="filterApplications('pending', this)" data-filter="pending">
+                            <i class="fas fa-clock mr-2"></i>Pending
+                        </button>
+                        <button class="filter-btn" onclick="filterApplications('accepted', this)" data-filter="accepted">
+                            <i class="fas fa-check-circle mr-2"></i>Diterima
+                        </button>
+                        <button class="filter-btn" onclick="filterApplications('rejected', this)" data-filter="rejected">
+                            <i class="fas fa-times-circle mr-2"></i>Ditolak
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications List -->
+            <div class="row" id="applicationsContainer">
+                <!-- Applications will be rendered here by JavaScript -->
+            </div>
+
+            <!-- Empty State (hidden by default) -->
+            <div class="row" id="emptyState" style="display:none;">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <div class="d-flex justify-content-center mb-3">
+                                <i class="fas fa-file-alt fa-4x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">Belum Ada Lamaran</h5>
+                            <p class="text-muted" id="emptyStateMessage">
+                                Anda belum melamar pekerjaan apapun
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius: 12px 12px 0 0;">
+                            <h6 class="mb-0 fw-bold" style="color: #2c3e50; font-size: 1rem;">
+                                <i class="fas fa-info-circle text-info mr-2"></i>Informasi Status Lamaran
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3" style="width:40px;height:40px;border-radius:10px;background:#fff3cd;display:flex;align-items:center;justify-content:center;">
+                                            <i class="fas fa-clock text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0" style="font-size:0.9rem;font-weight:600;">Status Pending</p>
+                                            <small style="color:#888;">Lamaran sedang diproses oleh perusahaan</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3" style="width:40px;height:40px;border-radius:10px;background:#d4edda;display:flex;align-items:center;justify-content:center;">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0" style="font-size:0.9rem;font-weight:600;">Diterima</p>
+                                            <small style="color:#888;">Selamat! Lamaran Anda diterima</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3" style="width:40px;height:40px;border-radius:10px;background:#f8d7da;display:flex;align-items:center;justify-content:center;">
+                                            <i class="fas fa-times-circle text-danger"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0" style="font-size:0.9rem;font-weight:600;">Ditolak</p>
+                                            <small style="color:#888;">Lamaran tidak memenuhi kriteria</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <small>&copy; 2026 JobPortal - Sistem Pencari Kerja</small>
+                <small><i class="fas fa-shield-alt mr-1"></i>Sistem Terproteksi</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== DETAIL MODAL ==================== -->
+    <div class="modal-overlay" id="detailModal" style="display:none;" onclick="closeDetailModal(event)">
+        <div class="modal-content-custom" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="modal-header-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="text-white mb-1 fw-bold" id="modalCompanyName">PT Maju Jaya</h5>
+                        <p class="text-white mb-0" style="opacity:0.9;font-size:0.9rem;" id="modalCompanyAddress">
+                            <i class="fas fa-map-marker-alt mr-1"></i> Jakarta Selatan
+                        </p>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeDetailModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <span class="badge mt-2" style="background:rgba(255,255,255,0.2);color:#fff;padding:6px 12px;border-radius:20px;" id="modalCategory">
+                    Teknologi Informasi
+                </span>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-4">
+                <!-- Application Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label style="color:#888;font-size:0.8rem;">
+                            <i class="fas fa-calendar-alt mr-1"></i>Tanggal Melamar
+                        </label>
+                        <p style="font-weight:600;font-size:0.95rem;" id="modalApplyDate">15 Maret 2026</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label style="color:#888;font-size:0.8rem;">
+                            <i class="fas fa-id-card mr-1"></i>ID Lamaran
+                        </label>
+                        <p style="font-weight:600;font-size:0.95rem;" id="modalAppId">#APP-001</p>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-4" id="modalNotesContainer">
+                    <h6 class="fw-bold mb-2" style="color:#2c3e50;">
+                        <i class="fas fa-sticky-note mr-2" style="color:#e67e22;"></i>Catatan Lamaran
+                    </h6>
+                    <p class="text-muted" style="line-height:1.8;font-style:italic;" id="modalNotes">
+                        "Saya sangat tertarik dengan posisi ini..."
+                    </p>
+                </div>
+
+                <!-- Positions Status -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3" style="color:#2c3e50;">
+                        <i class="fas fa-list-check mr-2" style="color:#2ecc71;"></i>Status Posisi
+                    </h6>
+                    <div id="modalPositions">
+                        <!-- Position items rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-right" id="modalActions">
+                    <button class="btn-danger-custom mr-2" id="btnCancel" onclick="showConfirmModal('cancel')" style="display:none;">
+                        <i class="fas fa-trash mr-2"></i>Batalkan Lamaran
+                    </button>
+                    <button class="btn-warning-custom" id="btnWithdraw" onclick="showConfirmModal('withdraw')" style="display:none;">
+                        <i class="fas fa-undo mr-2"></i>Tarik Lamaran
+                    </button>
+                    <button class="btn-light-custom ml-2" onclick="closeDetailModal()">
+                        <i class="fas fa-times mr-2"></i>Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CONFIRM MODAL ==================== -->
+    <div class="modal-overlay" id="confirmModal" style="display:none;" onclick="closeConfirmModal(event)">
+        <div class="confirm-modal-content" onclick="event.stopPropagation()">
+            <div style="margin-bottom:20px;" id="confirmIconContainer">
+                <i class="fas fa-trash confirm-icon danger" id="confirmIcon"></i>
+            </div>
+            <h5 style="margin-bottom:12px;font-weight:bold;color:#333;" id="confirmTitle">Batalkan Lamaran?</h5>
+            <p style="color:#666;margin-bottom:24px;" id="confirmMessage">
+                Lamaran yang dibatalkan akan dihapus permanen.
+            </p>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button class="btn-light-custom" onclick="closeConfirmModal()">
+                    <i class="fas fa-times mr-2"></i>Batal
+                </button>
+                <button class="btn-danger-custom" id="confirmActionBtn" onclick="handleConfirmAction()">
+                    <i class="fas fa-trash mr-2"></i>Ya, Batalkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LOGOUT MODAL ==================== -->
+    <div class="modal-overlay" id="logoutModal" style="display:none;" onclick="closeLogoutModal(event)">
+        <div class="confirm-modal-content" onclick="event.stopPropagation()">
+            <div style="margin-bottom:20px;">
+                <i class="fas fa-sign-out-alt confirm-icon danger"></i>
+            </div>
+            <h5 style="margin-bottom:12px;font-weight:bold;color:#333;">Konfirmasi Logout</h5>
+            <p style="color:#666;margin-bottom:6px;">Apakah Anda yakin ingin keluar?</p>
+            <small style="color:#999;display:block;margin-bottom:24px;">Anda akan diarahkan ke halaman login</small>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button class="btn-light-custom" onclick="closeLogoutModal()">
+                    <i class="fas fa-times mr-2"></i>Batal
+                </button>
+                <button class="btn-danger-custom" onclick="handleLogout()">
+                    <i class="fas fa-check mr-2"></i>Ya, Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ==================== HARDCODED DATA ====================
+        const applicationsData = [
+            {
+                id: 1,
+                application_id: 101,
+                company: "PT Maju Jaya Teknologi",
+                address: "Jl. Sudirman No. 123, Jakarta Selatan",
+                category: { job_category: "Teknologi Informasi" },
+                apply_date: "2026-03-15T10:30:00",
+                positions: [
+                    { id: 1, position: "Frontend Developer", apply_status: "accepted", date: "2026-03-15T10:30:00" },
+                    { id: 2, position: "Backend Developer", apply_status: "pending", date: "2026-03-15T10:30:00" }
+                ],
+                notes: "Saya sangat tertarik dengan posisi ini karena sesuai dengan pengalaman saya selama 3 tahun di bidang web development."
+            },
+            {
+                id: 2,
+                application_id: 102,
+                company: "PT Kreasi Digital Nusantara",
+                address: "Jl. Gatot Subroto No. 45, Bandung",
+                category: { job_category: "Desain & Kreatif" },
+                apply_date: "2026-03-10T14:15:00",
+                positions: [
+                    { id: 3, position: "UI/UX Designer", apply_status: "pending", date: "2026-03-10T14:15:00" }
+                ],
+                notes: "Saya memiliki portofolio desain yang dapat dilihat di website pribadi saya."
+            },
+            {
+                id: 3,
+                application_id: 103,
+                company: "PT Data Solusi Indonesia",
+                address: "Jl. MH Thamrin No. 78, Jakarta Pusat",
+                category: { job_category: "Data & Analitik" },
+                apply_date: "2026-03-05T09:00:00",
+                positions: [
+                    { id: 4, position: "Data Analyst", apply_status: "accepted", date: "2026-03-05T09:00:00" },
+                    { id: 5, position: "Data Scientist", apply_status: "rejected", date: "2026-03-05T09:00:00" }
+                ],
+                notes: null
+            },
+            {
+                id: 4,
+                application_id: 104,
+                company: "PT Inovasi Mandiri",
+                address: "Jl. Kuningan No. 90, Jakarta Selatan",
+                category: { job_category: "Manajemen" },
+                apply_date: "2026-02-28T11:45:00",
+                positions: [
+                    { id: 6, position: "Project Manager", apply_status: "accepted", date: "2026-02-28T11:45:00" }
+                ],
+                notes: "Pengalaman memimpin tim development selama 5 tahun."
+            },
+            {
+                id: 5,
+                application_id: 105,
+                company: "PT Global Media Networks",
+                address: "Jl. Asia Afrika No. 12, Surabaya",
+                category: { job_category: "Marketing" },
+                apply_date: "2026-02-20T08:30:00",
+                positions: [
+                    { id: 7, position: "Digital Marketing Specialist", apply_status: "pending", date: "2026-02-20T08:30:00" }
+                ],
+                notes: null
+            },
+            {
+                id: 6,
+                application_id: 106,
+                company: "PT Fintech Sejahtera",
+                address: "Jl. Rasuna Said No. 55, Jakarta Selatan",
+                category: { job_category: "Keuangan" },
+                apply_date: "2026-02-15T13:00:00",
+                positions: [
+                    { id: 8, position: "Financial Analyst", apply_status: "rejected", date: "2026-02-15T13:00:00" }
+                ],
+                notes: "Tertarik dengan industri fintech yang sedang berkembang."
+            }
+        ];
+
+        // ==================== GLOBAL STATE ====================
+        let currentFilter = 'all';
+        let selectedApplication = null;
+        let confirmActionType = ''; // 'cancel' or 'withdraw'
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'accepted':
+                    return { icon: 'fa-check-circle', color: '#155724', bg: '#d4edda', label: 'Diterima', cssClass: 'accepted' };
+                case 'rejected':
+                    return { icon: 'fa-times-circle', color: '#721c24', bg: '#f8d7da', label: 'Ditolak', cssClass: 'rejected' };
+                case 'pending':
+                    return { icon: 'fa-clock', color: '#856404', bg: '#fff3cd', label: 'Pending', cssClass: 'pending' };
+                default:
+                    return { icon: 'fa-question-circle', color: '#6c757d', bg: '#e9ecef', label: 'Unknown', cssClass: '' };
+            }
+        }
+
+        function canCancel(positions) {
+            if (!positions || positions.length === 0) return true;
+            return positions.every(pos => pos.apply_status === 'pending');
+        }
+
+        function hasAcceptedPosition(positions) {
+            if (!positions || positions.length === 0) return false;
+            return positions.some(pos => pos.apply_status === 'accepted');
+        }
+
+        // ==================== STATISTICS ====================
+        function calculateStats(applications) {
+            let total = 0, pending = 0, accepted = 0, rejected = 0;
+            applications.forEach(app => {
+                app.positions.forEach(pos => {
+                    total++;
+                    if (pos.apply_status === 'pending') pending++;
+                    else if (pos.apply_status === 'accepted') accepted++;
+                    else if (pos.apply_status === 'rejected') rejected++;
+                });
+            });
+            return { total, pending, accepted, rejected };
+        }
+
+        function updateStatsDisplay(stats) {
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statPending').textContent = stats.pending;
+            document.getElementById('statAccepted').textContent = stats.accepted;
+            document.getElementById('statRejected').textContent = stats.rejected;
+        }
+
+        // ==================== RENDER APPLICATIONS ====================
+        function getFilteredApplications() {
+            if (currentFilter === 'all') return applicationsData;
+            return applicationsData.filter(app => 
+                app.positions.some(pos => pos.apply_status === currentFilter)
+            );
+        }
+
+        function renderApplications() {
+            const filtered = getFilteredApplications();
+            const container = document.getElementById('applicationsContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                document.getElementById('emptyStateMessage').textContent = 
+                    currentFilter !== 'all' 
+                        ? `Tidak ada lamaran dengan status ${currentFilter}` 
+                        : 'Anda belum melamar pekerjaan apapun';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            let html = '';
+            filtered.forEach(vacancy => {
+                html += `
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm card-hover h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="d-flex align-items-center justify-content-center mr-3" 
+                                     style="width:50px;height:50px;border-radius:12px;background:#e8f4fd;">
+                                    <i class="fas fa-building" style="color:#3498db;font-size:22px;"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold" style="color:#2c3e50;">${vacancy.company}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>${vacancy.address || 'Lokasi tidak tersedia'}
+                                    </small>
+                                </div>
+                                ${vacancy.category ? `
+                                <span class="badge" style="background:#f0f0f0;color:#555;padding:6px 12px;border-radius:20px;font-size:0.8rem;">
+                                    ${vacancy.category.job_category}
+                                </span>` : ''}
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-2">
+                                    <i class="fas fa-users mr-1"></i>Posisi Dilamar:
+                                </small>
+                                <div class="d-flex flex-wrap" style="gap:8px;">
+                                    ${vacancy.positions.map(pos => {
+                                        const status = getStatusBadge(pos.apply_status);
+                                        return `
+                                        <div class="position-tag ${status.cssClass}">
+                                            <span style="font-size:0.85rem;font-weight:600;color:#333;">${pos.position}</span>
+                                            <span class="status-badge ${status.cssClass}">
+                                                <i class="fas ${status.icon} mr-1"></i>${status.label}
+                                            </span>
+                                        </div>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    Dilamar pada: ${formatDate(vacancy.apply_date)}
+                                </small>
+                            </div>
+
+                            <div class="text-right">
+                                <button class="btn-primary-custom btn-sm" onclick="viewDetail(${vacancy.application_id})">
+                                    <i class="fas fa-eye mr-2"></i>Lihat Detail
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+            
+            // Update stats
+            const stats = calculateStats(applicationsData);
+            updateStatsDisplay(stats);
+        }
+
+        // ==================== FILTER ====================
+        function filterApplications(filter, btnElement) {
+            currentFilter = filter;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'pending', 'accepted', 'rejected');
+            });
+            btnElement.classList.add('active');
+            if (filter !== 'all') {
+                btnElement.classList.add(filter);
+            }
+            
+            renderApplications();
+        }
+
+        // ==================== DETAIL MODAL ====================
+        function viewDetail(applicationId) {
+            selectedApplication = applicationsData.find(app => app.application_id === applicationId);
+            if (!selectedApplication) return;
+            
+            // Populate modal
+            document.getElementById('modalCompanyName').textContent = selectedApplication.company;
+            document.getElementById('modalCompanyAddress').innerHTML = 
+                `<i class="fas fa-map-marker-alt mr-1"></i>${selectedApplication.address || 'Lokasi tidak tersedia'}`;
+            document.getElementById('modalCategory').textContent = 
+                selectedApplication.category ? selectedApplication.category.job_category : '';
+            document.getElementById('modalApplyDate').textContent = formatDate(selectedApplication.apply_date);
+            document.getElementById('modalAppId').textContent = `#APP-${selectedApplication.application_id}`;
+            
+            // Notes
+            const notesContainer = document.getElementById('modalNotesContainer');
+            if (selectedApplication.notes) {
+                notesContainer.style.display = 'block';
+                document.getElementById('modalNotes').textContent = `"${selectedApplication.notes}"`;
+            } else {
+                notesContainer.style.display = 'none';
+            }
+            
+            // Positions
+            let positionsHtml = '';
+            selectedApplication.positions.forEach(pos => {
+                const status = getStatusBadge(pos.apply_status);
+                positionsHtml += `
+                <div class="col-12 mb-2">
+                    <div class="d-flex align-items-center justify-content-between p-3" 
+                         style="background:${status.bg};border-radius:8px;border:1px solid ${status.color}30;">
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center mr-3" 
+                                 style="width:40px;height:40px;border-radius:10px;background:white;">
+                                <i class="fas ${status.icon}" style="color:${status.color};font-size:18px;"></i>
+                            </div>
+                            <div>
+                                <span style="font-weight:600;font-size:0.95rem;">${pos.position}</span>
+                                <br/>
+                                <small style="color:${status.color};">${formatDate(pos.date)}</small>
+                            </div>
+                        </div>
+                        <span class="status-badge ${status.cssClass}" style="padding:6px 14px;font-size:0.85rem;border:2px solid ${status.color};">
+                            <i class="fas ${status.icon} mr-1"></i>${status.label}
+                        </span>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('modalPositions').innerHTML = positionsHtml;
+            
+            // Action buttons
+            const btnCancel = document.getElementById('btnCancel');
+            const btnWithdraw = document.getElementById('btnWithdraw');
+            
+            if (canCancel(selectedApplication.positions)) {
+                btnCancel.style.display = 'inline-block';
+            } else {
+                btnCancel.style.display = 'none';
+            }
+            
+            if (hasAcceptedPosition(selectedApplication.positions)) {
+                btnWithdraw.style.display = 'inline-block';
+            } else {
+                btnWithdraw.style.display = 'none';
+            }
+            
+            // Show modal
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function closeDetailModal(event) {
+            if (event && event.target !== document.getElementById('detailModal')) return;
+            document.getElementById('detailModal').style.display = 'none';
+            selectedApplication = null;
+        }
+
+        // ==================== CONFIRM MODAL ====================
+        function showConfirmModal(actionType) {
+            confirmActionType = actionType;
+            
+            const confirmIcon = document.getElementById('confirmIcon');
+            const confirmTitle = document.getElementById('confirmTitle');
+            const confirmMessage = document.getElementById('confirmMessage');
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
+            
+            if (actionType === 'cancel') {
+                confirmIcon.className = 'fas fa-trash confirm-icon danger';
+                confirmTitle.textContent = 'Batalkan Lamaran?';
+                confirmMessage.textContent = 'Lamaran yang dibatalkan akan dihapus permanen.';
+                confirmActionBtn.className = 'btn-danger-custom';
+                confirmActionBtn.innerHTML = '<i class="fas fa-trash mr-2"></i>Ya, Batalkan';
+            } else {
+                confirmIcon.className = 'fas fa-undo confirm-icon warning';
+                confirmTitle.textContent = 'Tarik Lamaran?';
+                confirmMessage.textContent = 'Lamaran yang ditarik akan ditandai sebagai ditolak. Tindakan ini tidak dapat dibatalkan.';
+                confirmActionBtn.className = 'btn-warning-custom';
+                confirmActionBtn.innerHTML = '<i class="fas fa-undo mr-2"></i>Ya, Tarik';
+            }
+            
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal(event) {
+            if (event && event.target !== document.getElementById('confirmModal')) return;
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmActionType = '';
+        }
+
+        function handleConfirmAction() {
+            if (!selectedApplication) return;
+            
+            if (confirmActionType === 'cancel') {
+                // Remove application from data
+                const index = applicationsData.findIndex(app => app.application_id === selectedApplication.application_id);
+                if (index > -1) {
+                    applicationsData.splice(index, 1);
+                }
+                showSuccessBanner('Lamaran berhasil dibatalkan!');
+            } else if (confirmActionType === 'withdraw') {
+                // Mark all positions as rejected
+                selectedApplication.positions.forEach(pos => {
+                    pos.apply_status = 'rejected';
+                });
+                showSuccessBanner('Lamaran berhasil ditarik!');
+            }
+            
+            closeConfirmModal();
+            closeDetailModal();
+            renderApplications();
+        }
+
+        // ==================== SUCCESS / ERROR BANNERS ====================
+        function showSuccessBanner(message) {
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successBanner').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('successBanner').style.display = 'none';
+            }, 5000);
+        }
+
+        function hideSuccessBanner() {
+            document.getElementById('successBanner').style.display = 'none';
+        }
+
+        function hideErrorBanner() {
+            document.getElementById('errorBanner').style.display = 'none';
+        }
+
+        // ==================== LOGOUT ====================
+        function showLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal(event) {
+            if (event && event.target !== document.getElementById('logoutModal')) return;
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        function handleLogout() {
+            // Simulasi logout - redirect ke halaman login
+            alert('Anda telah logout. Akan diarahkan ke halaman login.');
+            // window.location.href = '/login';
+        }
+
+        // ==================== MOBILE MENU ====================
+        function toggleMobileMenu() {
+            const navbarCollapse = document.getElementById('navbarNav');
+            navbarCollapse.classList.toggle('show');
+        }
+
+        // ==================== USER DROPDOWN ====================
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdownMenu');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const container = document.getElementById('userDropdownContainer');
+            const dropdown = document.getElementById('userDropdownMenu');
+            if (container && !container.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeDetailModal();
+                closeConfirmModal();
+                closeLogoutModal();
+            }
+        });
+
+        // ==================== INITIALIZATION ====================
+        function init() {
+            renderApplications();
+            const stats = calculateStats(applicationsData);
+            updateStatsDisplay(stats);
+        }
+
+        // Run on page load
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPortal - Dashboard Pencari Kerja</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background-color:#f5f5f5;overflow-x:hidden}
+        .navbar-dark .navbar-nav .nav-link{color:rgba(255,255,255,0.85)}
+        .navbar-dark .navbar-nav .nav-link:hover{color:#fff;background-color:rgba(255,255,255,0.1)}
+        .navbar-dark .navbar-nav .nav-link.active{background-color:rgba(255,255,255,0.25)!important;color:#fff!important}
+        .dropdown-item{font-size:0.9rem;cursor:pointer;transition:all 0.15s ease}
+        .dropdown-item:hover{background-color:#f8f9fa}
+        .dropdown-menu.show{display:block}
+        .stat-card{border:none;box-shadow:0 2px 8px rgba(0,0,0,0.1);border-radius:12px;transition:all 0.3s ease;cursor:pointer;text-decoration:none;color:inherit;display:block}
+        .stat-card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(0,0,0,0.15);text-decoration:none;color:inherit}
+        .icon-box{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+        .header-gradient-blue{background:linear-gradient(135deg, #3498db 0%, #2980b9 100%);border-radius:12px;color:white}
+        .table th{border-top:none;font-size:0.85rem;color:#888;font-weight:600}
+        .table td{font-size:0.85rem;vertical-align:middle}
+        .modal-backdrop-custom{position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px}
+        .modal-custom{background:white;border-radius:10px;width:420px;max-width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);text-align:center;padding:32px}
+        @media(max-width:991px){.navbar-collapse{background-color:#2c3e50;border-radius:0 0 12px 12px;padding:12px;margin-top:8px;box-shadow:0 8px 20px rgba(0,0,0,0.2)}.navbar-nav{gap:4px}.navbar-nav .nav-link{border-radius:8px!important;padding:10px 16px!important}.dropdown-menu.show{position:static!important;background-color:#34495e;border:1px solid rgba(255,255,255,0.1)}.dropdown-menu .dropdown-item{color:#fff}.dropdown-menu .dropdown-item:hover{background-color:rgba(255,255,255,0.1);color:#fff}.dropdown-menu .text-muted{color:rgba(255,255,255,0.6)!important}.dropdown-menu .border-bottom{border-color:rgba(255,255,255,0.1)!important}}
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/dashboard">
+                <div class="bg-white rounded d-flex align-items-center justify-content-center me-2" style="width:32px;height:32px"><i class="fas fa-briefcase text-primary" style="font-size:16px"></i></div>
+                <span style="font-weight:700;font-size:1.2rem">JobPortal</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" onclick="toggleMobileMenu()" style="padding:4px 8px"><i class="fas fa-bars text-white" id="mobileMenuIcon" style="font-size:20px"></i></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a href="/dashboard" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded active" style="font-size:0.9rem;font-weight:600;color:#fff;background-color:rgba(255,255,255,0.25)"><i class="fas fa-tachometer-alt me-2" style="font-size:14px"></i>Dashboard</a></li>
+                    <li class="nav-item"><a href="/profile" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-user-circle me-2" style="font-size:14px"></i>Profil Saya</a></li>
+                    <li class="nav-item"><a href="/validation" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-clipboard-check me-2" style="font-size:14px"></i>Validasi</a></li>
+                    <li class="nav-item"><a href="/job-vacancies" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-briefcase me-2" style="font-size:14px"></i>Lowongan</a></li>
+                    <li class="nav-item"><a href="/application" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-file-alt me-2" style="font-size:14px"></i>Lamaran</a></li>
+                    <li class="nav-item"><a href="/history" class="nav-link d-flex align-items-center px-3 py-2 mx-1 rounded" style="font-size:0.9rem"><i class="fas fa-history me-2" style="font-size:14px"></i>Riwayat</a></li>
+                </ul>
+                <div class="d-flex align-items-center ms-lg-3 mt-2 mt-lg-0">
+                    <a href="/notifications" class="btn btn-link text-white position-relative me-2" style="text-decoration:none;padding:8px 10px" title="Notifikasi"><i class="fas fa-bell" style="font-size:18px"></i><span class="badge bg-danger position-absolute" style="top:2px;right:2px;font-size:10px;padding:3px 5px;line-height:1">3</span></a>
+                    <div class="position-relative" id="userDropdownContainer">
+                        <button class="btn btn-link text-white d-flex align-items-center" type="button" onclick="toggleUserDropdown()" style="text-decoration:none;padding:8px 10px">
+                            <div class="rounded-circle bg-white d-flex align-items-center justify-content-center me-2" style="width:30px;height:30px"><span class="text-primary fw-bold" style="font-size:14px">B</span></div>
+                            <span class="d-none d-md-inline text-white" style="font-size:0.9rem">Budi Santoso</span>
+                            <i class="fas fa-chevron-down ms-2" id="userDropdownIcon" style="font-size:10px"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow border-0" id="userDropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:8px;border-radius:8px;min-width:220px;z-index:1000">
+                            <div class="px-3 py-2 border-bottom"><p class="mb-0 fw-bold" style="font-size:0.9rem">Budi Santoso</p><small class="text-muted" style="font-size:0.8rem">budi@email.com</small></div>
+                            <a class="dropdown-item py-2" href="/profile"><i class="fas fa-user-circle me-2 text-primary"></i>Profil Saya</a>
+                            <a class="dropdown-item py-2" href="/validation"><i class="fas fa-clipboard-check me-2 text-success"></i>Status Validasi</a>
+                            <a class="dropdown-item py-2" href="/bookmarks"><i class="fas fa-bookmark me-2 text-warning"></i>Bookmark</a>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item py-2 text-danger" onclick="showLogoutPopup()"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1" style="background-color:#f5f5f5;padding-top:76px;padding-bottom:24px">
+        <div class="container">
+            <!-- Welcome Section -->
+            <div class="row mb-4"><div class="col-12"><div class="card border-0 shadow-sm header-gradient-blue"><div class="card-body p-4"><div class="d-flex align-items-center justify-content-between"><div><h4 class="text-white mb-2 fw-bold"><i class="fas fa-home me-2"></i>Dashboard Pencari Kerja</h4><p class="text-white-50 mb-0" style="font-size:0.95rem">Selamat datang, <strong>Budi Santoso</strong></p></div><div class="d-none d-md-block text-end"><div class="text-white mb-1" style="font-size:0.85rem;opacity:0.8"><i class="fas fa-id-card me-1"></i>12345678</div><div class="text-white" style="font-size:0.8rem;opacity:0.7"><i class="fas fa-map-marker-alt me-1"></i>DKI Jakarta - Jakarta Pusat</div></div></div></div></div></div></div>
+
+            <!-- Validation Status Card -->
+            <div class="row mb-4"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px"><div class="card-body p-4"><div class="d-flex align-items-center justify-content-between"><div class="d-flex align-items-center"><div class="icon-box me-3" style="background-color:#e8f0fe"><i class="fas fa-clipboard-check" style="font-size:22px;color:#3498db"></i></div><div><h6 class="mb-1 fw-bold" style="color:#2c3e50;font-size:1rem">Status Validasi</h6><span class="badge" style="background-color:#d4edda;color:#155724;padding:6px 14px;border-radius:20px;font-size:0.85rem;border:1px solid #155724"><i class="fas fa-check-circle me-1"></i>Tervalidasi</span><small class="text-muted ms-2">Kategori: IT</small></div></div><a href="/validation" class="btn btn-outline-primary btn-sm" style="border-radius:8px">Lihat Detail</a></div></div></div></div></div>
+
+            <!-- Statistics Cards Row 1 -->
+            <div class="row" id="statsRow1"></div>
+            <!-- Statistics Cards Row 2 -->
+            <div class="row" id="statsRow2"></div>
+
+            <!-- Recent Applications & Recommended Jobs -->
+            <div class="row mt-2">
+                <div class="col-lg-6 mb-4" id="recentApplications"></div>
+                <div class="col-lg-6 mb-4" id="recommendedJobs"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4"><div class="col-12"><div class="card border-0 shadow-sm" style="border-radius:12px"><div class="card-header bg-white border-0 pt-4 pb-3"><h6 class="mb-0 fw-bold" style="color:#2c3e50;font-size:1rem"><i class="fas fa-bolt text-warning me-2"></i>Aksi Cepat</h6></div><div class="card-body pt-0"><div class="row"><div class="col-md-3 col-6 mb-3"><a href="/job-vacancies" class="btn btn-outline-primary w-100 py-3" style="border-radius:10px"><i class="fas fa-search me-2"></i>Cari Lowongan</a></div><div class="col-md-3 col-6 mb-3"><a href="/validation" class="btn btn-outline-success w-100 py-3" style="border-radius:10px"><i class="fas fa-clipboard-check me-2"></i>Ajukan Validasi</a></div><div class="col-md-3 col-6 mb-3"><a href="/profile" class="btn btn-outline-warning w-100 py-3" style="border-radius:10px"><i class="fas fa-user-edit me-2"></i>Update Profil</a></div><div class="col-md-3 col-6 mb-3"><a href="/application" class="btn btn-outline-info w-100 py-3" style="border-radius:10px"><i class="fas fa-file-alt me-2"></i>Lihat Lamaran</a></div></div></div></div></div></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-top mt-auto"><div class="container"><div class="d-flex justify-content-between align-items-center py-3"><small class="text-muted" style="font-size:0.85rem">&copy; 2026 JobPortal - Sistem Pencari Kerja</small><small class="text-muted" style="font-size:0.85rem"><i class="fas fa-shield-alt me-1"></i>Sistem Terproteksi</small></div></div></footer>
+
+    <!-- Logout Popup -->
+    <div class="modal-backdrop-custom" id="logoutPopup" style="display:none"><div class="modal-custom" onclick="event.stopPropagation()"><div style="margin-bottom:20px"><i class="fas fa-sign-out-alt" style="font-size:48px;color:#dc3545;background-color:#f8d7da;padding:16px;border-radius:50%"></i></div><h5 style="margin-bottom:12px;font-weight:bold;color:#333;font-size:1.25rem">Konfirmasi Logout</h5><p style="color:#666;margin-bottom:6px;font-size:1rem">Apakah Anda yakin ingin keluar?</p><small style="color:#999;display:block;margin-bottom:24px;font-size:0.9rem">Anda akan diarahkan ke halaman login</small><div style="display:flex;gap:12px;justify-content:center"><button class="btn btn-light" onclick="hideLogoutPopup()" style="padding:10px 24px;font-size:0.95rem;min-width:110px;border-radius:8px"><i class="fas fa-times me-2"></i>Batal</button><button class="btn btn-danger" onclick="handleLogout()" style="padding:10px 24px;font-size:0.95rem;min-width:110px;border-radius:8px"><i class="fas fa-check me-2"></i>Ya, Keluar</button></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==================== HARDCODED DATA ====================
+        const dashboardData = {
+            profile: { name: 'Budi Santoso', id_card_number: '12345678', regional: { province: 'DKI Jakarta', district: 'Jakarta Pusat' } },
+            validation_status: { status: 'accepted', job_category: 'IT' },
+            application_summary: { total_applications: 8, pending: 3, accepted: 4, rejected: 1 },
+            bookmarked_jobs: 5,
+            unread_notifications: 3,
+            recent_applications: [
+                { company: 'PT Teknologi Maju', positions: [{ position: 'Software Engineer', status: 'accepted' }] },
+                { company: 'PT Inovasi Digital', positions: [{ position: 'Data Analyst', status: 'pending' }] },
+                { company: 'CV Karya Bersama', positions: [{ position: 'Operator Produksi', status: 'pending' }] },
+                { company: 'PT Pariwisata Bali', positions: [{ position: 'Marketing', status: 'rejected' }] }
+            ],
+            recommended_jobs: [
+                { company: 'PT Solusi Informatika', category: 'IT', positions: [{ position: 'Network Engineer' }, { position: 'System Admin' }] },
+                { company: 'PT Edukasi Nusantara', category: 'Pendidikan', positions: [{ position: 'Guru Matematika' }] },
+                { company: 'PT Teknologi Maju', category: 'IT', positions: [{ position: 'UI/UX Designer' }, { position: 'QA Engineer' }, { position: 'DevOps' }] },
+                { company: 'PT Kreatif Digital', category: 'Desain', positions: [{ position: 'Graphic Designer' }] }
+            ]
+        };
+
+        function formatNumber(n){return n?.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".")||"0"}
+        function getStatusBadge(s){
+            switch(s){
+                case 'accepted':return{icon:'fa-check-circle',color:'#155724',bg:'#d4edda',label:'Diterima'};
+                case 'rejected':return{icon:'fa-times-circle',color:'#721c24',bg:'#f8d7da',label:'Ditolak'};
+                default:return{icon:'fa-clock',color:'#856404',bg:'#fff3cd',label:'Tertunda'};
+            }
+        }
+
+        function createStatCard(title,value,icon,bgColor,linkTo,subtitle){
+            const v=typeof value==='string'?value:formatNumber(value);
+            return `<div class="col-xl-3 col-md-6 mb-4"><a href="${linkTo||'#'}" class="stat-card"><div class="card border-0 shadow-sm h-100" style="border-radius:12px"><div class="card-body p-4"><div class="d-flex align-items-center justify-content-between mb-3"><div class="icon-box" style="background-color:${bgColor}"><i class="${icon}" style="font-size:22px;color:#fff"></i></div><div class="text-end"><h3 class="mb-0 fw-bold" style="font-size:1.8rem;color:#2c3e50">${v}</h3><small style="color:#7f8c8d;font-size:0.8rem">${subtitle||'Total'}</small></div></div><h6 style="color:#555;font-size:0.9rem;font-weight:600">${title}</h6></div></div></a></div>`;
+        }
+
+        function renderDashboard(){
+            const d=dashboardData;
+            document.getElementById('statsRow1').innerHTML=
+                createStatCard('Total Lamaran',d.application_summary.total_applications,'fas fa-file-alt','#3498db','/application','Lamaran Diajukan')+
+                createStatCard('Lamaran Pending',d.application_summary.pending,'fas fa-clock','#f39c12','/application','Menunggu Diproses')+
+                createStatCard('Lamaran Diterima',d.application_summary.accepted,'fas fa-check-circle','#2ecc71','/application','Disetujui')+
+                createStatCard('Lamaran Ditolak',d.application_summary.rejected,'fas fa-times-circle','#e74c3c',null,'Dikembalikan');
+            document.getElementById('statsRow2').innerHTML=
+                createStatCard('Lowongan Dibookmark',d.bookmarked_jobs,'fas fa-bookmark','#9b59b6','/bookmarks','Tersimpan')+
+                createStatCard('Notifikasi Belum Dibaca',d.unread_notifications,'fas fa-bell','#e67e22','/notifications','Notifikasi Baru')+
+                createStatCard('Lowongan Tersedia','-','fas fa-briefcase','#1abc9c','/job-vacancies','Lihat Semua')+
+                createStatCard('Riwayat Lamaran','-','fas fa-history','#7f8c8d','/history','Lihat Riwayat');
+
+            document.getElementById('recentApplications').innerHTML=`
+                <div class="card border-0 shadow-sm h-100" style="border-radius:12px"><div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius:12px 12px 0 0"><div class="d-flex justify-content-between align-items-center"><h6 class="mb-0 fw-bold" style="color:#2c3e50;font-size:1rem"><i class="fas fa-file-alt text-primary me-2"></i>Lamaran Terbaru</h6><a href="/application" class="btn btn-sm btn-outline-primary" style="border-radius:8px">Lihat Semua</a></div></div><div class="card-body pt-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Perusahaan</th><th>Posisi</th><th>Status</th></tr></thead><tbody>
+                        ${d.recent_applications.map(item=>{const statuses=item.positions.map(p=>getStatusBadge(p.status));return`<tr><td style="font-size:0.9rem"><i class="fas fa-building text-muted me-2"></i>${item.company}</td><td style="font-size:0.85rem">${item.positions.map(p=>p.position).join(', ')}</td><td>${statuses.map(s=>`<span class="badge me-1" style="background-color:${s.bg};color:${s.color};padding:3px 8px;border-radius:20px;font-size:0.7rem">${s.label}</span>`).join('')}</td></tr>`}).join('')}
+                    </tbody></table></div></div></div>`;
+
+            document.getElementById('recommendedJobs').innerHTML=`
+                <div class="card border-0 shadow-sm h-100" style="border-radius:12px"><div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius:12px 12px 0 0"><div class="d-flex justify-content-between align-items-center"><h6 class="mb-0 fw-bold" style="color:#2c3e50;font-size:1rem"><i class="fas fa-star text-warning me-2"></i>Rekomendasi Lowongan</h6><a href="/job-vacancies" class="btn btn-sm btn-outline-primary" style="border-radius:8px">Lihat Semua</a></div></div><div class="card-body pt-0"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Perusahaan</th><th>Kategori</th><th class="text-center">Posisi</th></tr></thead><tbody>
+                        ${d.recommended_jobs.map(job=>`<tr><td style="font-size:0.9rem"><i class="fas fa-building text-muted me-2"></i>${job.company}</td><td style="font-size:0.85rem"><i class="fas fa-tag text-muted me-1"></i>${job.category}</td><td class="text-center"><span class="badge" style="background-color:#e8f0fe;color:#3498db;padding:4px 10px;border-radius:20px;font-size:0.78rem">${job.positions?.length||0} Posisi</span></td></tr>`).join('')}
+                    </tbody></table></div></div></div>`;
+        }
+
+        // ==================== MOBILE MENU ====================
+        let mobileMenuOpen=false;
+        function toggleMobileMenu(){
+            mobileMenuOpen=!mobileMenuOpen;
+            document.getElementById('navbarNav').classList.toggle('show',mobileMenuOpen);
+            document.getElementById('mobileMenuIcon').className=`fas fa-${mobileMenuOpen?'times':'bars'} text-white`;
+        }
+
+        // ==================== USER DROPDOWN ====================
+        function toggleUserDropdown(){
+            const dd=document.getElementById('userDropdown');
+            const icon=document.getElementById('userDropdownIcon');
+            const isOpen=dd.style.display==='block';
+            dd.style.display=isOpen?'none':'block';
+            icon.className=`fas fa-chevron-${isOpen?'down':'up'} ms-2`;
+        }
+        document.addEventListener('click',function(e){
+            const container=document.getElementById('userDropdownContainer');
+            if(container&&!container.contains(e.target)){document.getElementById('userDropdown').style.display='none';document.getElementById('userDropdownIcon').className='fas fa-chevron-down ms-2'}
+        });
+
+        // ==================== LOGOUT ====================
+        function showLogoutPopup(){document.getElementById('logoutPopup').style.display='flex'}
+        function hideLogoutPopup(){document.getElementById('logoutPopup').style.display='none'}
+        function handleLogout(){localStorage.clear();window.location.href='/'}
+        document.getElementById('logoutPopup').addEventListener('click',function(e){if(e.target===this)hideLogoutPopup()});
+
+        // ==================== NAVIGATION ACTIVE STATE ====================
+        document.querySelectorAll('.navbar-nav .nav-link').forEach(link=>{
+            link.addEventListener('click',function(){
+                document.querySelectorAll('.navbar-nav .nav-link').forEach(l=>{l.classList.remove('active');l.style.fontWeight='400';l.style.backgroundColor='transparent'});
+                this.classList.add('active');this.style.fontWeight='600';this.style.backgroundColor='rgba(255,255,255,0.25)';
+            });
+        });
+
+        // Initialize
+        renderDashboard();
+    </script>
+</body>
+</html>

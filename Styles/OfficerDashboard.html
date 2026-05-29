@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPortal - Officer Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f5f5f5; overflow-x: hidden;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            height: 100vh; width: 280px; position: fixed; left: 0; top: 0; z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-x: hidden;
+            display: flex; flex-direction: column; background: #343a40; transition: all 0.3s ease;
+        }
+        .sidebar.collapsed { width: 70px; }
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5); z-index: 999; display: none;
+        }
+        
+        /* Main Content */
+        .main-content { margin-left: 280px; min-height: 100vh; padding-top: 60px; transition: all 0.3s ease; }
+        .main-content.expanded { margin-left: 70px; }
+        
+        /* Fixed Header */
+        .fixed-header {
+            position: fixed; top: 0; right: 0; left: 280px; z-index: 998; height: 60px;
+            background: white; border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease;
+        }
+        .fixed-header.expanded { left: 70px; }
+        
+        /* Navigation */
+        .nav-link-custom {
+            color: rgba(255,255,255,0.7) !important; border-left: 3px solid transparent;
+            text-decoration: none; display: flex; align-items: center; padding: 10px 16px;
+            border-radius: 4px; margin-bottom: 2px; transition: all 0.2s ease; font-size: 0.9rem;
+        }
+        .nav-link-custom:hover { color: #fff !important; background-color: rgba(255,255,255,0.1); }
+        .nav-link-custom.active {
+            color: #fff !important; background-color: rgba(230, 126, 34, 0.8); border-left-color: #e67e22;
+        }
+        .nav-link-custom.collapsed-link { justify-content: center; padding: 14px; }
+        
+        /* Cards */
+        .stat-card {
+            border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 12px;
+            transition: all 0.3s ease; cursor: pointer; text-decoration: none; color: inherit; display: block;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); text-decoration: none; color: inherit; }
+        .icon-box {
+            width: 50px; height: 50px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Badges */
+        .badge-officer { background-color: #0d6efd; color: white; }
+        .badge-status-pending { background-color: #fff3cd; color: #856404; }
+        .badge-status-accepted { background-color: #d4edda; color: #155724; }
+        .badge-status-rejected { background-color: #f8d7da; color: #721c24; }
+        .badge-count { background-color: #e8f0fe; color: #3498db; }
+        .badge-vacancy { background-color: #fde8e8; color: #e74c3c; }
+        .badge-validation { background-color: #e8f8f0; color: #2ecc71; }
+        
+        /* Header Gradient */
+        .header-gradient-orange {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            border-radius: 12px; color: white;
+        }
+        
+        /* Table */
+        .table th { border-top: none; font-size: 0.8rem; color: #888; font-weight: 600; }
+        .table td { font-size: 0.85rem; vertical-align: middle; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .main-content.expanded { margin-left: 0; }
+            .fixed-header { left: 0; }
+            .fixed-header.expanded { left: 0; }
+        }
+        
+        /* Scrollbar */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        
+        /* Logout Modal */
+        .modal-backdrop-custom {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+        }
+        .modal-custom {
+            background: white; border-radius: 10px; width: 420px; max-width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; padding: 32px;
+        }
+        
+        .btn-quick-action {
+            border-radius: 10px; padding: 12px; font-size: 0.9rem; transition: all 0.2s;
+        }
+        .btn-quick-action:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar bg-dark text-white" id="sidebar">
+        <div class="d-flex align-items-center border-bottom border-secondary flex-shrink-0" style="padding: 14px 18px; height: 60px;">
+            <div class="d-flex align-items-center w-100" id="sidebarHeaderExpanded">
+                <div class="bg-primary rounded d-flex align-items-center justify-content-center me-3" style="width: 38px; height: 38px; min-width: 38px;">
+                    <i class="fas fa-briefcase text-white" style="font-size: 18px;"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <h6 class="mb-0 text-white fw-bold text-truncate" style="font-size: 1.1rem;">JobPortal</h6>
+                    <small class="text-white-50 text-capitalize" style="font-size: 0.7rem;">Officer</small>
+                </div>
+                <button class="btn btn-link text-white p-0 ms-2" id="sidebarToggleBtn" style="text-decoration: none;">
+                    <i class="fas fa-chevron-left" style="font-size: 16px;"></i>
+                </button>
+            </div>
+            <div id="sidebarHeaderCollapsed" style="display: none;">
+                <button class="btn btn-link text-white p-0 mx-auto" id="sidebarExpandBtn" style="text-decoration: none;">
+                    <i class="fas fa-bars" style="font-size: 20px;"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="border-bottom border-secondary flex-shrink-0" style="padding: 14px 18px;" id="sidebarUserProfile">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                    <span class="fw-bold text-dark" style="font-size: 1.1rem;">O</span>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <p class="mb-1 text-white text-truncate" style="font-size: 0.95rem; font-weight: 500;">Officer User</p>
+                    <span class="badge text-capitalize badge-officer" style="font-size: 0.8rem; padding: 4px 8px;">Officer</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex-grow-1 overflow-auto" style="padding: 12px 8px;" id="sidebarNav">
+            <a href="/officer/dashboard" class="nav-link-custom active" data-path="/officer/dashboard">
+                <i class="fas fa-tachometer-alt" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i>
+                <span class="flex-grow-1">Dashboard</span>
+                <i class="fas fa-chevron-right" style="font-size: 12px;"></i>
+            </a>
+            <a href="/officer/profile" class="nav-link-custom" data-path="/officer/profile">
+                <i class="fas fa-user-circle" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i>
+                <span class="flex-grow-1">Profil Saya</span>
+            </a>
+            <a href="/officer/vacancies" class="nav-link-custom" data-path="/officer/vacancies">
+                <i class="fas fa-briefcase" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i>
+                <span class="flex-grow-1">Lowongan Saya</span>
+            </a>
+            <a href="/officer/applications" class="nav-link-custom" data-path="/officer/applications">
+                <i class="fas fa-file-alt" style="font-size: 16px; margin-right: 12px; width: 20px; text-align: center;"></i>
+                <span class="flex-grow-1">Lamaran Masuk</span>
+            </a>
+        </div>
+        
+        <div class="border-top border-secondary flex-shrink-0" style="padding: 14px 18px;" id="sidebarFooterExpanded">
+            <button class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center" id="logoutBtnSidebar" style="font-size: 0.9rem; padding: 8px;">
+                <i class="fas fa-sign-out-alt me-2" style="font-size: 16px;"></i>Logout
+            </button>
+        </div>
+        <div class="border-top border-secondary flex-shrink-0" style="padding: 10px; display: none;" id="sidebarFooterCollapsed">
+            <button class="btn btn-link text-white p-0 mx-auto d-flex" id="logoutBtnCollapsed" style="text-decoration: none;" title="Logout">
+                <i class="fas fa-sign-out-alt" style="font-size: 20px;"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Fixed Header -->
+        <header class="fixed-header" id="fixedHeader">
+            <div class="container-fluid h-100" style="padding: 0 24px;">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-light d-md-none me-3" id="mobileMenuBtn" style="padding: 6px 10px;">
+                            <i class="fas fa-bars" style="font-size: 18px;"></i>
+                        </button>
+                        <div>
+                            <h6 class="mb-0 text-dark fw-bold" style="line-height: 1.3; font-size: 1.1rem;">Dashboard</h6>
+                            <small class="text-muted">Selamat datang, Officer User</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge badge-officer d-none d-md-inline-block text-capitalize" style="font-size: 0.85rem; padding: 6px 12px;">
+                            <i class="fas fa-user-tie me-1"></i>Officer
+                        </span>
+                        <div class="dropdown">
+                            <button class="btn btn-light position-relative" type="button" data-bs-toggle="dropdown" style="padding: 8px 12px;">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge bg-danger position-absolute" style="top: 4px; right: 4px; font-size: 10px; padding: 3px 6px; line-height: 1;">3</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow" style="width: 300px; margin-top: 8px;">
+                                <h6 class="dropdown-header">Notifikasi</h6>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item py-2" href="#"><i class="fas fa-check-circle text-success me-2"></i>Permintaan validasi baru</a>
+                                <a class="dropdown-item py-2" href="#"><i class="fas fa-file-alt text-primary me-2"></i>Status lamaran diperbarui</a>
+                                <a class="dropdown-item py-2" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Persetujuan tertunda</a>
+                            </div>
+                        </div>
+                        <button class="btn btn-light d-flex align-items-center" style="padding: 8px 14px;">
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                <span class="text-white" style="font-weight: bold;">O</span>
+                            </div>
+                            <span class="d-none d-md-inline">Officer User</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Page Content -->
+        <main class="flex-grow-1" style="background-color: #f5f5f5; padding: 24px;">
+            <div class="container-fluid px-0">
+                <!-- Welcome Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm header-gradient-orange">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h4 class="text-white mb-2 fw-bold">
+                                            <i class="fas fa-user-tie me-2"></i>Dashboard Officer
+                                        </h4>
+                                        <p class="text-white-50 mb-0" style="font-size: 0.95rem;">
+                                            Selamat datang, <strong>Officer User</strong>
+                                        </p>
+                                    </div>
+                                    <div class="d-none d-md-block text-end">
+                                        <div class="text-white mb-1" style="font-size: 0.85rem; opacity: 0.8;">
+                                            <i class="fas fa-id-badge me-1"></i>OFF-2024-001
+                                        </div>
+                                        <div class="text-white" style="font-size: 0.8rem; opacity: 0.7;">
+                                            <i class="fas fa-map-marker-alt me-1"></i>DKI Jakarta - Jakarta Pusat
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Summary -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="fw-bold mb-3" style="color: #2c3e50; font-size: 0.95rem;">
+                            <i class="fas fa-calendar-day text-primary me-2"></i>Ringkasan Hari Ini
+                        </h6>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
+                            <div class="card-body py-3">
+                                <i class="fas fa-file-alt mb-2" style="font-size: 20px; color: #3498db;"></i>
+                                <h5 class="mb-0 fw-bold" style="color: #2c3e50;">12</h5>
+                                <small style="color: #888; font-size: 0.7rem;">Lamaran Baru</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
+                            <div class="card-body py-3">
+                                <i class="fas fa-check-double mb-2" style="font-size: 20px; color: #2ecc71;"></i>
+                                <h5 class="mb-0 fw-bold" style="color: #2c3e50;">8</h5>
+                                <small style="color: #888; font-size: 0.7rem;">Diproses</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
+                            <div class="card-body py-3">
+                                <i class="fas fa-clipboard-check mb-2" style="font-size: 20px; color: #9b59b6;"></i>
+                                <h5 class="mb-0 fw-bold" style="color: #2c3e50;">5</h5>
+                                <small style="color: #888; font-size: 0.7rem;">Validasi</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
+                            <div class="card-body py-3">
+                                <i class="fas fa-briefcase mb-2" style="font-size: 20px; color: #e74c3c;"></i>
+                                <h5 class="mb-0 fw-bold" style="color: #2c3e50;">3</h5>
+                                <small style="color: #888; font-size: 0.7rem;">Lowongan Baru</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
+                            <div class="card-body py-3">
+                                <i class="fas fa-exclamation-circle mb-2" style="font-size: 20px; color: #e74c3c;"></i>
+                                <h5 class="mb-0 fw-bold" style="color: #2c3e50;">4</h5>
+                                <small style="color: #888; font-size: 0.7rem;">Perlu Perhatian</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
+                            <div class="card-body py-3">
+                                <i class="fas fa-bell mb-2" style="font-size: 20px; color: #f39c12;"></i>
+                                <h5 class="mb-0 fw-bold" style="color: #2c3e50;">7</h5>
+                                <small style="color: #888; font-size: 0.7rem;">Notifikasi</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Stats Row 1 -->
+                <div class="row" id="statsRow1"></div>
+                
+                <!-- Main Stats Row 2 -->
+                <div class="row" id="statsRow2"></div>
+                
+                <!-- Validation Stats Row -->
+                <div class="row" id="statsRow3"></div>
+
+                <!-- Detail Section -->
+                <div class="row mt-2">
+                    <!-- Recent Validations -->
+                    <div class="col-lg-4 mb-4" id="recentValidations"></div>
+                    
+                    <!-- Recent Vacancies -->
+                    <div class="col-lg-4 mb-4" id="recentVacancies"></div>
+                    
+                    <!-- Recent Applications -->
+                    <div class="col-lg-4 mb-4" id="recentApplications"></div>
+                </div>
+
+                <!-- Top Vacancies & Monthly Trends -->
+                <div class="row mt-2">
+                    <div class="col-lg-6 mb-4" id="topVacancies"></div>
+                    <div class="col-lg-6 mb-4" id="monthlyTrends"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                            <div class="card-header bg-white border-0 pt-4 pb-3">
+                                <h6 class="mb-0 fw-bold" style="color: #2c3e50; font-size: 1rem;">
+                                    <i class="fas fa-bolt text-warning me-2"></i>Aksi Cepat
+                                </h6>
+                            </div>
+                            <div class="card-body pt-0">
+                                <div class="row">
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <a href="/officer/vacancies" class="btn btn-outline-danger w-100 py-3 btn-quick-action">
+                                            <i class="fas fa-briefcase me-2"></i>Kelola Lowongan
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <a href="/officer/applications" class="btn btn-outline-primary w-100 py-3 btn-quick-action">
+                                            <i class="fas fa-file-alt me-2"></i>Kelola Lamaran
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <a href="/validator/validations/pending" class="btn btn-outline-warning w-100 py-3 btn-quick-action">
+                                            <i class="fas fa-clipboard-check me-2"></i>Validasi Pending
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-3">
+                                        <a href="/validator/profile" class="btn btn-outline-info w-100 py-3 btn-quick-action">
+                                            <i class="fas fa-user-edit me-2"></i>Update Profil
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-white border-top" style="padding: 14px 24px;">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted" style="font-size: 0.9rem;">&copy; 2026 JobPortal - Sistem Pencari Kerja</small>
+                <small class="text-muted" style="font-size: 0.9rem;"><i class="fas fa-shield-alt me-1"></i>Sistem Terproteksi</small>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Logout Popup -->
+    <div class="modal-backdrop-custom" id="logoutPopup" style="display: none;">
+        <div class="modal-custom" onclick="event.stopPropagation()">
+            <div style="margin-bottom: 20px;">
+                <i class="fas fa-sign-out-alt" style="font-size: 48px; color: #dc3545; background-color: #f8d7da; padding: 16px; border-radius: 50%;"></i>
+            </div>
+            <h5 style="margin-bottom: 12px; font-weight: bold; color: #333; font-size: 1.25rem;">Konfirmasi Logout</h5>
+            <p style="color: #666; margin-bottom: 6px; font-size: 1rem;">Apakah Anda yakin ingin keluar?</p>
+            <small style="color: #999; display: block; margin-bottom: 24px; font-size: 0.9rem;">Anda akan diarahkan ke halaman login</small>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-light" onclick="hideLogoutPopup()" style="padding: 10px 24px; font-size: 0.95rem; min-width: 110px;">
+                    <i class="fas fa-times me-2"></i>Batal
+                </button>
+                <button class="btn btn-danger" onclick="handleLogout()" style="padding: 10px 24px; font-size: 0.95rem; min-width: 110px;">
+                    <i class="fas fa-check me-2"></i>Ya, Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ==================== HARDCODED DATA ====================
+        const dashboardData = {
+            profile: {
+                name: 'Officer User',
+                employee_id: 'OFF-2024-001',
+                regional: { province: 'DKI Jakarta', district: 'Jakarta Pusat' }
+            },
+            today_summary: {
+                new_applications_today: 12,
+                processed_today: 8,
+                validations_today: 5,
+                vacancies_created_today: 3
+            },
+            attention_needed: {
+                old_pending_applications: 4,
+                urgent_notifications: 7
+            },
+            job_vacancy_stats: {
+                total_vacancies: 45,
+                total_positions: 120,
+                vacancies_this_month: 8,
+                recent_vacancies: [
+                    { company: 'PT Teknologi Maju', job_apply_societies_count: 245 },
+                    { company: 'PT Inovasi Digital', job_apply_societies_count: 198 },
+                    { company: 'CV Karya Bersama', job_apply_societies_count: 167 },
+                    { company: 'PT Solusi Informatika', job_apply_societies_count: 112 }
+                ]
+            },
+            application_stats: {
+                total: 342,
+                pending: 89,
+                accepted: 210,
+                rejected: 43,
+                this_month: 67,
+                recent_applications: [
+                    { society: { name: 'Budi Santoso' }, status: 'pending' },
+                    { society: { name: 'Siti Rahayu' }, status: 'accepted' },
+                    { society: { name: 'Dewi Lestari' }, status: 'pending' },
+                    { society: { name: 'Agus Wijaya' }, status: 'rejected' },
+                    { society: { name: 'Rudi Hermawan' }, status: 'accepted' }
+                ]
+            },
+            validation_stats: {
+                total_handled: 156,
+                pending: 23,
+                accepted: 120,
+                declined: 13
+            },
+            unassigned_validations: 45,
+            recent_validations: [
+                { society: { name: 'Budi Santoso' }, status: 'accepted' },
+                { society: { name: 'Siti Rahayu' }, status: 'pending' },
+                { society: { name: 'Anisa Putri' }, status: 'accepted' },
+                { society: { name: 'Hendra Gunawan' }, status: 'pending' }
+            ],
+            top_vacancies: [
+                { id: 1, company: 'PT Teknologi Maju', category: 'IT', total_applicants: 245 },
+                { id: 2, company: 'PT Inovasi Digital', category: 'IT', total_applicants: 198 },
+                { id: 3, company: 'CV Karya Bersama', category: 'Manufaktur', total_applicants: 167 },
+                { id: 4, company: 'PT Pariwisata Bali', category: 'Hospitality', total_applicants: 134 },
+                { id: 5, company: 'PT Solusi Informatika', category: 'IT', total_applicants: 112 }
+            ],
+            monthly_trends: [
+                { month: 'Jan 2026', applications: 89, vacancies: 12, validations: 34 },
+                { month: 'Feb 2026', applications: 102, vacancies: 15, validations: 41 },
+                { month: 'Mar 2026', applications: 145, vacancies: 18, validations: 52 },
+                { month: 'Apr 2026', applications: 178, vacancies: 22, validations: 67 },
+                { month: 'Mei 2026', applications: 210, vacancies: 25, validations: 78 },
+                { month: 'Jun 2026', applications: 256, vacancies: 30, validations: 89 }
+            ]
+        };
+
+        // ==================== HELPERS ====================
+        function formatNumber(num) {
+            return num?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") || "0";
+        }
+
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'accepted': return { cls: 'badge-status-accepted', icon: 'fa-check-circle', label: 'Disetujui' };
+                case 'rejected': case 'declined': return { cls: 'badge-status-rejected', icon: 'fa-times-circle', label: 'Ditolak' };
+                default: return { cls: 'badge-status-pending', icon: 'fa-clock', label: 'Tertunda' };
+            }
+        }
+
+        function createStatCard(title, value, icon, bgColor, linkTo, subtitle) {
+            const cardContent = `
+                <div class="card border-0 shadow-sm h-100 stat-card" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="icon-box" style="background-color: ${bgColor};">
+                                <i class="${icon}" style="font-size: 22px; color: #fff;"></i>
+                            </div>
+                            <div class="text-end">
+                                <h3 class="mb-0 fw-bold" style="font-size: 1.8rem; color: #2c3e50;">${formatNumber(value)}</h3>
+                                <small style="color: #7f8c8d; font-size: 0.8rem;">${subtitle || 'Total'}</small>
+                            </div>
+                        </div>
+                        <h6 style="color: #555; font-size: 0.9rem; font-weight: 600;">${title}</h6>
+                    </div>
+                </div>
+            `;
+            
+            if (linkTo) {
+                return `<div class="col-xl-3 col-md-6 mb-4"><a href="${linkTo}" class="stat-card" style="text-decoration: none; color: inherit;">${cardContent}</a></div>`;
+            }
+            return `<div class="col-xl-3 col-md-6 mb-4">${cardContent}</div>`;
+        }
+
+        // ==================== RENDER DASHBOARD ====================
+        function renderDashboard() {
+            const d = dashboardData;
+            
+            // Stats Row 1 - Application Stats
+            document.getElementById('statsRow1').innerHTML = 
+                createStatCard('Total Lowongan', d.job_vacancy_stats.total_vacancies, 'fas fa-briefcase', '#e74c3c', '/officer/vacancies', 'Lowongan Aktif') +
+                createStatCard('Total Lamaran', d.application_stats.total, 'fas fa-file-alt', '#3498db', '/officer/applications', 'Lamaran Masuk') +
+                createStatCard('Lamaran Pending', d.application_stats.pending, 'fas fa-clock', '#f39c12', '/officer/applications', 'Perlu Diproses') +
+                createStatCard('Lamaran Diterima', d.application_stats.accepted, 'fas fa-check-circle', '#2ecc71', null, 'Disetujui');
+
+            // Stats Row 2 - More Stats
+            document.getElementById('statsRow2').innerHTML = 
+                createStatCard('Lamaran Ditolak', d.application_stats.rejected, 'fas fa-times-circle', '#c0392b', null, 'Dikembalikan') +
+                createStatCard('Total Posisi', d.job_vacancy_stats.total_positions, 'fas fa-list-ol', '#1abc9c', null, 'Posisi Tersedia') +
+                createStatCard('Lowongan Bulan Ini', d.job_vacancy_stats.vacancies_this_month, 'fas fa-calendar-alt', '#e67e22', null, 'Mei 2026') +
+                createStatCard('Lamaran Bulan Ini', d.application_stats.this_month, 'fas fa-chart-line', '#9b59b6', null, 'Bulan Berjalan');
+
+            // Stats Row 3 - Validation Stats
+            document.getElementById('statsRow3').innerHTML = 
+                createStatCard('Total Validasi Ditangani', d.validation_stats.total_handled, 'fas fa-clipboard-list', '#34495e', null, 'Keseluruhan') +
+                createStatCard('Validasi Tertunda', d.validation_stats.pending, 'fas fa-hourglass-half', '#f39c12', null, 'Milik Saya') +
+                createStatCard('Validasi Disetujui', d.validation_stats.accepted, 'fas fa-check-circle', '#27ae60', null, 'Terverifikasi') +
+                createStatCard('Belum Ditugaskan', d.unassigned_validations, 'fas fa-inbox', '#8e44ad', '/validator/validations/pending', 'Bisa Diambil');
+
+            // Recent Validations
+            document.getElementById('recentValidations').innerHTML = `
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius: 12px 12px 0 0;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold" style="color: #2c3e50; font-size: 1rem;"><i class="fas fa-clipboard-check text-success me-2"></i>Validasi Terbaru</h6>
+                            <a href="/validator/validations/pending" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">Lihat Semua</a>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead><tr><th style="border-top: none; font-size: 0.8rem; color: #888;">Pencari Kerja</th><th style="border-top: none; font-size: 0.8rem; color: #888;">Status</th></tr></thead>
+                                <tbody>
+                                    ${d.recent_validations.map(item => {
+                                        const s = getStatusBadge(item.status);
+                                        return `<tr><td style="font-size: 0.85rem;"><i class="fas fa-user text-muted me-1"></i>${item.society.name}</td><td><span class="badge ${s.cls}" style="padding: 3px 8px; border-radius: 20px; font-size: 0.7rem;">${s.label}</span></td></tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Recent Vacancies
+            document.getElementById('recentVacancies').innerHTML = `
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius: 12px 12px 0 0;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold" style="color: #2c3e50; font-size: 1rem;"><i class="fas fa-briefcase text-danger me-2"></i>Lowongan Terbaru</h6>
+                            <a href="/officer/vacancies" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">Lihat Semua</a>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead><tr><th style="border-top: none; font-size: 0.8rem; color: #888;">Perusahaan</th><th class="text-center" style="border-top: none; font-size: 0.8rem; color: #888;">Pelamar</th></tr></thead>
+                                <tbody>
+                                    ${d.job_vacancy_stats.recent_vacancies.map(item => `
+                                        <tr><td style="font-size: 0.85rem;"><i class="fas fa-building text-muted me-1"></i>${item.company}</td>
+                                        <td class="text-center"><span class="badge badge-count" style="padding: 3px 8px; border-radius: 20px; font-size: 0.75rem;">${item.job_apply_societies_count}</span></td></tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Recent Applications
+            document.getElementById('recentApplications').innerHTML = `
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius: 12px 12px 0 0;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold" style="color: #2c3e50; font-size: 1rem;"><i class="fas fa-file-alt text-primary me-2"></i>Lamaran Terbaru</h6>
+                            <a href="/officer/applications" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">Lihat Semua</a>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead><tr><th style="border-top: none; font-size: 0.8rem; color: #888;">Pelamar</th><th style="border-top: none; font-size: 0.8rem; color: #888;">Status</th></tr></thead>
+                                <tbody>
+                                    ${d.application_stats.recent_applications.slice(0, 5).map(item => {
+                                        const s = getStatusBadge(item.status);
+                                        return `<tr><td style="font-size: 0.85rem;"><i class="fas fa-user text-muted me-1"></i>${item.society.name}</td><td><span class="badge ${s.cls}" style="padding: 3px 8px; border-radius: 20px; font-size: 0.7rem;">${s.label}</span></td></tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Top Vacancies
+            document.getElementById('topVacancies').innerHTML = `
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius: 12px 12px 0 0;">
+                        <h6 class="mb-0 fw-bold" style="color: #2c3e50; font-size: 1rem;"><i class="fas fa-fire text-danger me-2"></i>Lowongan Terpopuler</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead><tr><th style="border-top: none; font-size: 0.8rem; color: #888;">#</th><th style="border-top: none; font-size: 0.8rem; color: #888;">Perusahaan</th><th style="border-top: none; font-size: 0.8rem; color: #888;">Kategori</th><th class="text-center" style="border-top: none; font-size: 0.8rem; color: #888;">Pelamar</th></tr></thead>
+                                <tbody>
+                                    ${d.top_vacancies.map((item, i) => `
+                                        <tr><td style="font-size: 0.85rem; font-weight: 600;">${i + 1}</td><td style="font-size: 0.85rem;">${item.company}</td><td style="font-size: 0.8rem;">${item.category}</td>
+                                        <td class="text-center"><span class="badge badge-count" style="padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;">${item.total_applicants}</span></td></tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Monthly Trends
+            document.getElementById('monthlyTrends').innerHTML = `
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                    <div class="card-header bg-white border-0 pt-4 pb-3" style="border-radius: 12px 12px 0 0;">
+                        <h6 class="mb-0 fw-bold" style="color: #2c3e50; font-size: 1rem;"><i class="fas fa-chart-line text-primary me-2"></i>Tren Bulanan (6 Bulan)</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead><tr><th style="border-top: none; font-size: 0.8rem; color: #888;">Bulan</th><th class="text-center" style="border-top: none; font-size: 0.8rem; color: #888;">Lamaran</th><th class="text-center" style="border-top: none; font-size: 0.8rem; color: #888;">Lowongan</th><th class="text-center" style="border-top: none; font-size: 0.8rem; color: #888;">Validasi</th></tr></thead>
+                                <tbody>
+                                    ${d.monthly_trends.map(item => `
+                                        <tr><td style="font-size: 0.85rem; font-weight: 600;">${item.month}</td>
+                                        <td class="text-center"><span class="badge badge-count" style="padding: 3px 8px; border-radius: 20px; font-size: 0.75rem;">${item.applications}</span></td>
+                                        <td class="text-center"><span class="badge badge-vacancy" style="padding: 3px 8px; border-radius: 20px; font-size: 0.75rem;">${item.vacancies}</span></td>
+                                        <td class="text-center"><span class="badge badge-validation" style="padding: 3px 8px; border-radius: 20px; font-size: 0.75rem;">${item.validations}</span></td></tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== SIDEBAR TOGGLE ====================
+        let sidebarCollapsed = false;
+
+        function toggleSidebar() {
+            sidebarCollapsed = !sidebarCollapsed;
+            updateSidebarState();
+        }
+
+        function updateSidebarState() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const fixedHeader = document.getElementById('fixedHeader');
+            
+            if (sidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+                fixedHeader.classList.add('expanded');
+                document.getElementById('sidebarHeaderExpanded').style.display = 'none';
+                document.getElementById('sidebarHeaderCollapsed').style.display = 'block';
+                document.getElementById('sidebarUserProfile').style.display = 'none';
+                document.getElementById('sidebarFooterExpanded').style.display = 'none';
+                document.getElementById('sidebarFooterCollapsed').style.display = 'block';
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+                fixedHeader.classList.remove('expanded');
+                document.getElementById('sidebarHeaderExpanded').style.display = 'flex';
+                document.getElementById('sidebarHeaderCollapsed').style.display = 'none';
+                document.getElementById('sidebarUserProfile').style.display = 'block';
+                document.getElementById('sidebarFooterExpanded').style.display = 'block';
+                document.getElementById('sidebarFooterCollapsed').style.display = 'none';
+            }
+        }
+
+        function openMobileSidebar() {
+            document.getElementById('sidebar').classList.add('mobile-open');
+            document.getElementById('sidebarOverlay').classList.add('show');
+        }
+
+        function closeMobileSidebar() {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+
+        // ==================== LOGOUT ====================
+        function showLogoutPopup() { document.getElementById('logoutPopup').style.display = 'flex'; }
+        function hideLogoutPopup() { document.getElementById('logoutPopup').style.display = 'none'; }
+        function handleLogout() { localStorage.clear(); window.location.href = '/'; }
+
+        // ==================== EVENT LISTENERS ====================
+        function setupEventListeners() {
+            document.getElementById('sidebarToggleBtn').addEventListener('click', toggleSidebar);
+            document.getElementById('sidebarExpandBtn').addEventListener('click', toggleSidebar);
+            document.getElementById('mobileMenuBtn').addEventListener('click', openMobileSidebar);
+            document.getElementById('sidebarOverlay').addEventListener('click', closeMobileSidebar);
+            document.getElementById('logoutBtnSidebar').addEventListener('click', showLogoutPopup);
+            document.getElementById('logoutBtnCollapsed').addEventListener('click', showLogoutPopup);
+            document.getElementById('logoutPopup').addEventListener('click', function(e) { if (e.target === this) hideLogoutPopup(); });
+            
+            document.querySelectorAll('.nav-link-custom').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link-custom').forEach(l => {
+                        l.classList.remove('active');
+                        const chevron = l.querySelector('.fa-chevron-right');
+                        if (chevron) chevron.remove();
+                    });
+                    this.classList.add('active');
+                    if (!sidebarCollapsed) {
+                        const chevron = document.createElement('i');
+                        chevron.className = 'fas fa-chevron-right';
+                        chevron.style.fontSize = '12px';
+                        this.appendChild(chevron);
+                    }
+                    if (window.innerWidth <= 768) closeMobileSidebar();
+                });
+            });
+            
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) closeMobileSidebar();
+            });
+        }
+
+        // ==================== INITIALIZE ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            renderDashboard();
+        });
+    </script>
+</body>
+</html>
